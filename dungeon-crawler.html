@@ -3555,6 +3555,9 @@
                     let fistRotation = 0;
                     let shoulderPull = 0;
 
+                    // Max Extension = 8 Pixel (passend zur 28px Faust-Reichweite)
+                    const maxExtend = 8;
+
                     if (isAttacking) {
                         if (punchProgress < 0.15) {
                             // Wind-up: Arm zieht zurück, Schulter dreht
@@ -3565,20 +3568,20 @@
                         } else if (punchProgress < 0.4) {
                             // Punch: Schnelle Streckung mit Körperdrehung
                             const punch = easing.easeOutQuad((punchProgress - 0.15) / 0.25);
-                            armExtend = -3 + 18 * punch;
+                            armExtend = -3 + (maxExtend + 3) * punch;
                             armAngleOffset = -0.3 + 0.4 * punch;
                             fistRotation = 0.2 * punch;
                             shoulderPull = 2 - 3 * punch;
                         } else if (punchProgress < 0.6) {
-                            // Hold: Volle Streckung
-                            armExtend = 15;
+                            // Hold: Volle Streckung (nur bis Reichweitengrenze)
+                            armExtend = maxExtend;
                             armAngleOffset = 0.1;
                             fistRotation = 0.2;
                             shoulderPull = -1;
                         } else {
                             // Return: Arm zurück in Grundstellung
                             const ret = easing.easeInQuad((punchProgress - 0.6) / 0.4);
-                            armExtend = 15 * (1 - ret);
+                            armExtend = maxExtend * (1 - ret);
                             armAngleOffset = 0.1 * (1 - ret);
                             fistRotation = 0.2 * (1 - ret);
                             shoulderPull = -1 * (1 - ret);
