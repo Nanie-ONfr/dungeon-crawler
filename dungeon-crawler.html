@@ -594,8 +594,19 @@
                     <p>WASD / Pfeiltasten: Bewegung</p>
                     <p>Leertaste: Angriff</p>
                     <p>E: Item aufheben</p>
-                    <p>Q: Bombe werfen (Lvl 3)</p>
+                    <p>Shift: Dash</p>
+                    <p>Q: Wirbelschlag</p>
                     <p>1-9: Item benutzen</p>
+                </div>
+
+                <div class="stat-section">
+                    <h4>⚙️ SCHWIERIGKEIT</h4>
+                    <select id="difficultySelect" style="width: 100%; padding: 5px; background: #1a1a2e; color: #fff; border: 1px solid #4a4a6a; border-radius: 3px;">
+                        <option value="easy">🟢 Leicht</option>
+                        <option value="normal" selected>🟡 Normal</option>
+                        <option value="hard">🔴 Schwer</option>
+                    </select>
+                    <p id="difficultyInfo" style="font-size: 10px; color: #888; margin-top: 5px;">Monster: Normal</p>
                 </div>
             </div>
         </div>
@@ -707,9 +718,26 @@
                 abilities: {
                     bomb: { cooldown: 0, maxCooldown: 120 }  // Only from items now
                 },
+                // Critical hit system
+                critChance: 0.10,        // 10% base crit chance
+                critMultiplier: 2.0,     // 2x damage on crit
+                // Status effects
+                statusEffects: [],       // { type, damage, duration, tickTimer }
+                // Player abilities
+                dashCooldown: 0,
+                dashMaxCooldown: 90,     // 1.5 seconds
+                isDashing: false,
+                dashTimer: 0,
+                dashDirection: { x: 0, y: 0 },
+                spinCooldown: 0,
+                spinMaxCooldown: 180,    // 3 seconds
+                isSpinning: false,
+                spinTimer: 0,
                 // Spawn protection (5 seconds = 300 frames at 60fps for level 1)
                 spawnProtection: 300
             },
+            // Difficulty setting
+            difficulty: 'normal',  // 'easy', 'normal', 'hard'
             // Secret menu state
             secretMenuOpen: false,
             secretCodeBuffer: '',
@@ -730,7 +758,7 @@
             keys: {
                 w: false, a: false, s: false, d: false,
                 ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false,
-                e: false, x: false
+                e: false, x: false, q: false, Shift: false
             },
             spacePressed: false,
             animCounter: 0
@@ -1039,10 +1067,10 @@
                 { name: 'Eisenschwert', attack: 10, type: 'weapon', rarity: 0.28, style: 'iron_sword', range: 80, tier: 'common' },
                 { name: 'Stahlschwert', attack: 15, type: 'weapon', rarity: 0.15, style: 'steel_sword', range: 85, tier: 'uncommon' },
                 // Swords - Rare/Legendary (ab Level 10)
-                { name: 'Flammschwert', attack: 25, type: 'weapon', rarity: 0.04, style: 'flame', range: 90, tier: 'legendary', minLevel: 10 },
-                // Daggers (fast, short range)
-                { name: 'Dolch', attack: 4, type: 'weapon', rarity: 0.22, style: 'dagger', range: 50, speed: 0.7, tier: 'common' },
-                { name: 'Giftdolch', attack: 8, type: 'weapon', rarity: 0.08, style: 'poison_dagger', range: 50, speed: 0.6, tier: 'uncommon' },
+                { name: 'Flammschwert', attack: 25, type: 'weapon', rarity: 0.04, style: 'flame', range: 90, tier: 'legendary', minLevel: 10, statusEffect: { type: 'burn', damage: 3, duration: 120, chance: 0.25 } },
+                // Daggers (fast, short range, high crit)
+                { name: 'Dolch', attack: 4, type: 'weapon', rarity: 0.22, style: 'dagger', range: 50, speed: 0.7, tier: 'common', critBonus: 0.10 },
+                { name: 'Giftdolch', attack: 8, type: 'weapon', rarity: 0.08, style: 'poison_dagger', range: 50, speed: 0.6, tier: 'uncommon', critBonus: 0.15, statusEffect: { type: 'poison', damage: 2, duration: 180, chance: 0.3 } },
                 // Axes (slow, high damage)
                 { name: 'Handaxt', attack: 12, type: 'weapon', rarity: 0.12, style: 'axe', range: 70, speed: 1.3, tier: 'common' },
                 { name: 'Kriegsaxt', attack: 20, type: 'weapon', rarity: 0.05, style: 'battleaxe', range: 75, speed: 1.5, tier: 'rare', minLevel: 10 },
@@ -1053,7 +1081,9 @@
                 { name: 'Hellebarde', attack: 16, type: 'weapon', rarity: 0.04, style: 'halberd', range: 120, speed: 1.4, tier: 'rare', minLevel: 10 },
                 // Magic weapons
                 { name: 'Magierstab', attack: 14, type: 'weapon', rarity: 0.05, style: 'staff', range: 100, tier: 'rare', minLevel: 10 },
-                { name: 'Feuerstab', attack: 22, type: 'weapon', rarity: 0.03, style: 'fire_staff', range: 100, tier: 'legendary', minLevel: 10 }
+                { name: 'Feuerstab', attack: 22, type: 'weapon', rarity: 0.03, style: 'fire_staff', range: 100, tier: 'legendary', minLevel: 10, statusEffect: { type: 'burn', damage: 4, duration: 150, chance: 0.35 } },
+                // Ice weapon (from bosses)
+                { name: 'Eisstab', attack: 20, type: 'weapon', rarity: 0.02, style: 'staff', range: 100, tier: 'legendary', minLevel: 15, statusEffect: { type: 'freeze', slowAmount: 0.5, duration: 120, chance: 0.30 } }
             ],
             armor: [
                 { name: 'Lederrüstung', defense: 2, type: 'armor', rarity: 0.5, style: 'leather' },
@@ -1752,13 +1782,20 @@
                     attempts++;
                 } while (!validPos && attempts < 100);
 
+                // Difficulty multipliers for boss
+                const diffMult = {
+                    easy: { hp: 0.7, attack: 0.7, defense: 0.8 },
+                    normal: { hp: 1, attack: 1, defense: 1 },
+                    hard: { hp: 1.5, attack: 1.3, defense: 1.2 }
+                }[game.difficulty] || { hp: 1, attack: 1, defense: 1 };
+
                 const boss = {
                     name: bossTemplate.name,
                     color: bossTemplate.color,
-                    hp: Math.floor(bossTemplate.hp * levelMultiplier),
-                    maxHp: Math.floor(bossTemplate.hp * levelMultiplier),
-                    attack: Math.floor(bossTemplate.attack * levelMultiplier),
-                    defense: Math.floor(bossTemplate.defense * levelMultiplier),
+                    hp: Math.floor(bossTemplate.hp * levelMultiplier * diffMult.hp),
+                    maxHp: Math.floor(bossTemplate.hp * levelMultiplier * diffMult.hp),
+                    attack: Math.floor(bossTemplate.attack * levelMultiplier * diffMult.attack),
+                    defense: Math.floor(bossTemplate.defense * levelMultiplier * diffMult.defense),
                     xp: Math.floor(bossTemplate.xp * levelMultiplier),
                     gold: Math.floor(bossTemplate.gold * levelMultiplier),
                     speed: bossTemplate.speed,
@@ -1834,7 +1871,13 @@
                     const equippedWeapon = weaponPool[Math.floor(Math.random() * weaponPool.length)];
                     const equippedArmor = armorPool[Math.floor(Math.random() * armorPool.length)];
 
-                    // Calculate total attack and defense
+                    // Calculate total attack and defense with difficulty multipliers
+                    const diffMult = {
+                        easy: { hp: 0.7, attack: 0.7, defense: 0.8 },
+                        normal: { hp: 1, attack: 1, defense: 1 },
+                        hard: { hp: 1.5, attack: 1.3, defense: 1.2 }
+                    }[game.difficulty] || { hp: 1, attack: 1, defense: 1 };
+
                     const baseAtk = template.baseAttack || template.attack || 5;
                     const baseDef = template.baseDefense || template.defense || 1;
                     const weaponAtk = equippedWeapon ? equippedWeapon.attack : 0;
@@ -1846,10 +1889,10 @@
                         ...template,
                         x, y,
                         size: template.style === 'orc' ? 22 : (template.style === 'goblin' ? 14 : (isElite ? 24 : 18)),
-                        hp: isElite ? Math.floor(template.hp * levelScale) : template.hp,
-                        maxHp: isElite ? Math.floor(template.hp * levelScale) : template.hp,
-                        attack: isElite ? Math.floor(totalAttack * levelScale) : totalAttack,
-                        defense: isElite ? Math.floor(totalDefense * levelScale) : totalDefense,
+                        hp: Math.floor((isElite ? template.hp * levelScale : template.hp) * diffMult.hp),
+                        maxHp: Math.floor((isElite ? template.hp * levelScale : template.hp) * diffMult.hp),
+                        attack: Math.floor((isElite ? totalAttack * levelScale : totalAttack) * diffMult.attack),
+                        defense: Math.floor((isElite ? totalDefense * levelScale : totalDefense) * diffMult.defense),
                         equippedWeapon: equippedWeapon ? { ...equippedWeapon } : null,
                         equippedArmor: equippedArmor ? { ...equippedArmor } : null,
                         weaponRange: equippedWeapon ? (equippedWeapon.range || 60) : 40,
@@ -1948,8 +1991,12 @@
             const isElite = monster.isElite || false;
             let item = null;
 
-            // Drop chances based on monster type (increased)
-            const dropChance = isBoss ? 1.0 : (isElite ? 0.85 : 0.50);
+            // Difficulty drop rate modifier
+            const dropMult = { easy: 1.2, normal: 1, hard: 0.8 }[game.difficulty] || 1;
+
+            // Drop chances based on monster type (modified by difficulty)
+            const baseDropChance = isBoss ? 1.0 : (isElite ? 0.85 : 0.50);
+            const dropChance = Math.min(1.0, baseDropChance * dropMult);
 
             if (Math.random() > dropChance) return; // No drop
 
@@ -2636,16 +2683,40 @@
             if (closest) {
                 const totalAttack = game.player.attack + (game.player.attackBoost || 0);
                 let damage = Math.max(1, totalAttack - closest.defense);
+
+                // Critical hit check
+                const weaponCritBonus = game.player.equippedWeapon?.critBonus || 0;
+                const totalCritChance = game.player.critChance + weaponCritBonus;
+                const isCrit = Math.random() < totalCritChance;
+                if (isCrit) {
+                    damage = Math.floor(damage * game.player.critMultiplier);
+                }
+
                 // Boss shield reduces damage by 50%
                 if (closest.isBoss && closest.shieldActive) {
                     damage = Math.max(1, Math.floor(damage * 0.5));
                     addLog(`🛡️ Schild absorbiert Schaden!`, 'combat');
                 }
                 closest.hp -= damage;
-                closest.flashTimer = 10;
-                addLog(`Du triffst ${closest.name} für ${damage} Schaden!`, 'combat');
-                createParticles(closest.x, closest.y, closest.shieldActive ? '#60a5fa' : '#fbbf24');
+                closest.flashTimer = isCrit ? 20 : 10;
+
+                if (isCrit) {
+                    addLog(`💥 KRITISCH! Du triffst ${closest.name} für ${damage} Schaden!`, 'combat');
+                    createCritParticles(closest.x, closest.y);
+                    game.screenShake = 12;
+                } else {
+                    addLog(`Du triffst ${closest.name} für ${damage} Schaden!`, 'combat');
+                }
+                createParticles(closest.x, closest.y, isCrit ? '#fde047' : (closest.shieldActive ? '#60a5fa' : '#fbbf24'));
                 createSlashEffect(closest.x, closest.y);
+
+                // Apply status effect from weapon
+                if (game.player.equippedWeapon?.statusEffect) {
+                    const effect = game.player.equippedWeapon.statusEffect;
+                    if (Math.random() < effect.chance) {
+                        applyStatusEffect(closest, effect);
+                    }
+                }
 
                 // Monster hit sound
                 sfx.monsterHit(closest.style, closest.isBoss);
@@ -3142,6 +3213,11 @@
                 addLog(`Level ${game.currentRoom} betreten!`, 'info');
             }
             document.getElementById('currentRoom').textContent = game.currentRoom;
+
+            // Auto-save every 5 rooms
+            if (game.currentRoom % 5 === 0) {
+                autoSave();
+            }
         }
 
         function gameWon() {
@@ -3168,6 +3244,34 @@
             }
         }
 
+        // Special particles for critical hits
+        function createCritParticles(x, y) {
+            // Larger golden/white particles
+            for (let i = 0; i < 25; i++) {
+                const angle = (i / 25) * Math.PI * 2;
+                const speed = Math.random() * 8 + 4;
+                game.particles.push({
+                    x, y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    color: i % 3 === 0 ? '#ffffff' : (i % 3 === 1 ? '#fde047' : '#f59e0b'),
+                    life: 50,
+                    size: Math.random() * 5 + 3
+                });
+            }
+            // Add "KRIT" text particle
+            game.particles.push({
+                x, y: y - 20,
+                vx: 0,
+                vy: -2,
+                color: '#fde047',
+                life: 60,
+                size: 0,
+                isText: true,
+                text: 'KRIT!'
+            });
+        }
+
         function updateParticles() {
             for (let i = game.particles.length - 1; i >= 0; i--) {
                 const p = game.particles[i];
@@ -3192,6 +3296,294 @@
 
                 if (p.life <= 0) {
                     game.particles.splice(i, 1);
+                }
+            }
+        }
+
+        // Apply status effect to target (monster or player)
+        function applyStatusEffect(target, effectTemplate) {
+            // Initialize statusEffects array if not exists
+            if (!target.statusEffects) target.statusEffects = [];
+
+            // Check if already has this effect type - refresh duration instead of stacking
+            const existing = target.statusEffects.find(e => e.type === effectTemplate.type);
+            if (existing) {
+                existing.duration = effectTemplate.duration;
+                return;
+            }
+
+            const effect = {
+                type: effectTemplate.type,
+                damage: effectTemplate.damage || 0,
+                duration: effectTemplate.duration,
+                tickTimer: 0,
+                slowAmount: effectTemplate.slowAmount || 0
+            };
+
+            target.statusEffects.push(effect);
+
+            // Log message
+            const effectNames = { poison: '☠️ Gift', burn: '🔥 Brennen', freeze: '❄️ Einfrieren' };
+            const targetName = target === game.player ? 'Du wurdest' : target.name + ' wurde';
+            addLog(`${targetName} mit ${effectNames[effect.type]} belegt!`, 'combat');
+
+            // Apply slow for freeze
+            if (effect.type === 'freeze' && effect.slowAmount > 0) {
+                target.originalSpeed = target.originalSpeed || target.speed;
+                target.speed = target.originalSpeed * effect.slowAmount;
+            }
+        }
+
+        // Update all status effects
+        function updateStatusEffects() {
+            // Update player status effects
+            updateTargetStatusEffects(game.player);
+
+            // Update monster status effects
+            for (const monster of game.monsters) {
+                updateTargetStatusEffects(monster);
+            }
+        }
+
+        function updateTargetStatusEffects(target) {
+            if (!target.statusEffects || target.statusEffects.length === 0) return;
+
+            for (let i = target.statusEffects.length - 1; i >= 0; i--) {
+                const effect = target.statusEffects[i];
+
+                // Apply damage every 30 frames (0.5 seconds)
+                effect.tickTimer++;
+                if (effect.tickTimer >= 30 && effect.damage > 0) {
+                    effect.tickTimer = 0;
+
+                    if (target === game.player) {
+                        game.player.hp = Math.max(0, game.player.hp - effect.damage);
+                        game.player.flashTimer = 5;
+                        if (game.player.hp <= 0 && !game.player.isDying) {
+                            startPlayerDeath();
+                        }
+                    } else {
+                        target.hp -= effect.damage;
+                        target.flashTimer = 5;
+
+                        // Create effect particles
+                        const colors = { poison: '#22c55e', burn: '#f97316', freeze: '#67e8f9' };
+                        for (let p = 0; p < 5; p++) {
+                            game.particles.push({
+                                x: target.x + (Math.random() - 0.5) * 20,
+                                y: target.y + (Math.random() - 0.5) * 20,
+                                vx: (Math.random() - 0.5) * 2,
+                                vy: -Math.random() * 2,
+                                color: colors[effect.type],
+                                life: 20,
+                                size: 3
+                            });
+                        }
+
+                        // Check if monster died from DoT
+                        if (target.hp <= 0 && !target.isDying) {
+                            sfx.monsterDeath(target.style, target.isBoss);
+                            addLog(`${target.name} stirbt an ${effect.type === 'poison' ? 'Gift' : 'Feuer'}!`, 'combat');
+                            game.player.xp += target.xp;
+                            game.player.gold += target.gold;
+                            game.monstersKilled++;
+                            dropMonsterLoot(target);
+
+                            const index = game.monsters.indexOf(target);
+                            if (index > -1) {
+                                game.monsters.splice(index, 1);
+                                target.deathFrame = 0;
+                                target.isDying = true;
+                                game.dyingMonsters.push(target);
+                            }
+
+                            checkLevelUp();
+                            updateMonsterCount();
+                            if (game.monsters.length === 0) roomCleared();
+                            return; // Stop processing effects for dead monster
+                        }
+                    }
+                }
+
+                // Decrease duration
+                effect.duration--;
+
+                // Remove expired effects
+                if (effect.duration <= 0) {
+                    // Restore speed for freeze
+                    if (effect.type === 'freeze' && target.originalSpeed) {
+                        target.speed = target.originalSpeed;
+                        delete target.originalSpeed;
+                    }
+                    target.statusEffects.splice(i, 1);
+                }
+            }
+        }
+
+        // Execute dash ability (Shift key)
+        function executeDash() {
+            // Get movement direction
+            let dx = 0, dy = 0;
+            if (game.keys.w || game.keys.ArrowUp) dy -= 1;
+            if (game.keys.s || game.keys.ArrowDown) dy += 1;
+            if (game.keys.a || game.keys.ArrowLeft) dx -= 1;
+            if (game.keys.d || game.keys.ArrowRight) dx += 1;
+
+            // If no direction, dash in facing direction
+            if (dx === 0 && dy === 0) {
+                dx = game.player.facingLeft ? -1 : 1;
+            }
+
+            // Normalize
+            const len = Math.hypot(dx, dy);
+            if (len > 0) {
+                dx /= len;
+                dy /= len;
+            }
+
+            game.player.isDashing = true;
+            game.player.dashTimer = 12; // 12 frames of dash
+            game.player.dashDirection = { x: dx, y: dy };
+            game.player.dashCooldown = game.player.dashMaxCooldown;
+            game.player.spawnProtection = Math.max(game.player.spawnProtection, 12); // Invulnerable during dash
+
+            // Dash particles
+            for (let i = 0; i < 10; i++) {
+                game.particles.push({
+                    x: game.player.x,
+                    y: game.player.y,
+                    vx: -dx * 2 + (Math.random() - 0.5) * 2,
+                    vy: -dy * 2 + (Math.random() - 0.5) * 2,
+                    color: '#60a5fa',
+                    life: 20,
+                    size: 4
+                });
+            }
+
+            addLog('⚡ Dash!', 'info');
+        }
+
+        // Execute spin attack ability (Q key)
+        function executeSpinAttack() {
+            game.player.isSpinning = true;
+            game.player.spinTimer = 20; // 20 frames of spin
+            game.player.spinCooldown = game.player.spinMaxCooldown;
+
+            // Damage all monsters in range
+            const spinRange = 80;
+            const totalAttack = game.player.attack + (game.player.attackBoost || 0);
+            const spinDamage = Math.floor(totalAttack * 0.5);
+            let hitCount = 0;
+
+            for (const monster of game.monsters) {
+                const dist = Math.hypot(monster.x - game.player.x, monster.y - game.player.y);
+                if (dist < spinRange) {
+                    let damage = Math.max(1, spinDamage - monster.defense);
+
+                    // Boss shield reduces damage
+                    if (monster.isBoss && monster.shieldActive) {
+                        damage = Math.max(1, Math.floor(damage * 0.5));
+                    }
+
+                    monster.hp -= damage;
+                    monster.flashTimer = 15;
+                    hitCount++;
+
+                    createParticles(monster.x, monster.y, '#f97316');
+
+                    if (monster.hp <= 0 && !monster.isDying) {
+                        sfx.monsterDeath(monster.style, monster.isBoss);
+                        game.player.xp += monster.xp;
+                        game.player.gold += monster.gold;
+                        game.monstersKilled++;
+                        dropMonsterLoot(monster);
+
+                        const index = game.monsters.indexOf(monster);
+                        if (index > -1) {
+                            game.monsters.splice(index, 1);
+                            monster.deathFrame = 0;
+                            monster.isDying = true;
+                            game.dyingMonsters.push(monster);
+                        }
+                    }
+                }
+            }
+
+            // Spin particles in a circle
+            for (let i = 0; i < 24; i++) {
+                const angle = (i / 24) * Math.PI * 2;
+                game.particles.push({
+                    x: game.player.x + Math.cos(angle) * 40,
+                    y: game.player.y + Math.sin(angle) * 40,
+                    vx: Math.cos(angle) * 5,
+                    vy: Math.sin(angle) * 5,
+                    color: i % 2 === 0 ? '#f97316' : '#fbbf24',
+                    life: 25,
+                    size: 5
+                });
+            }
+
+            if (hitCount > 0) {
+                addLog(`🌀 Wirbelschlag trifft ${hitCount} Gegner!`, 'combat');
+                game.screenShake = 10;
+                checkLevelUp();
+                updateMonsterCount();
+                if (game.monsters.length === 0) roomCleared();
+            } else {
+                addLog('🌀 Wirbelschlag!', 'info');
+            }
+        }
+
+        // Update player abilities (cooldowns, dash movement)
+        function updatePlayerAbilities() {
+            // Decrease cooldowns
+            if (game.player.dashCooldown > 0) game.player.dashCooldown--;
+            if (game.player.spinCooldown > 0) game.player.spinCooldown--;
+
+            // Handle dash movement
+            if (game.player.isDashing && game.player.dashTimer > 0) {
+                const dashSpeed = 12;
+                const newX = game.player.x + game.player.dashDirection.x * dashSpeed;
+                const newY = game.player.y + game.player.dashDirection.y * dashSpeed;
+
+                // Check wall collision
+                let canMove = true;
+                for (const wall of game.walls) {
+                    if (newX - 10 < wall.x + wall.width && newX + 10 > wall.x &&
+                        newY - 10 < wall.y + wall.height && newY + 10 > wall.y) {
+                        canMove = false;
+                        break;
+                    }
+                }
+
+                if (canMove) {
+                    game.player.x = Math.max(20, Math.min(canvas.width - 20, newX));
+                    game.player.y = Math.max(20, Math.min(canvas.height - 20, newY));
+                }
+
+                game.player.dashTimer--;
+
+                // Trail particles
+                game.particles.push({
+                    x: game.player.x,
+                    y: game.player.y,
+                    vx: 0,
+                    vy: 0,
+                    color: '#60a5fa',
+                    life: 15,
+                    size: 6
+                });
+
+                if (game.player.dashTimer <= 0) {
+                    game.player.isDashing = false;
+                }
+            }
+
+            // Handle spin animation
+            if (game.player.isSpinning && game.player.spinTimer > 0) {
+                game.player.spinTimer--;
+                if (game.player.spinTimer <= 0) {
+                    game.player.isSpinning = false;
                 }
             }
         }
@@ -5216,10 +5608,20 @@
                 ctx.fillStyle = p.color;
                 ctx.globalAlpha = alpha;
 
-                const size = p.size || 3;
-                ctx.shadowBlur = 5;
-                ctx.shadowColor = p.color;
-                ctx.fillRect(p.x - size/2, p.y - size/2, size, size);
+                if (p.isText) {
+                    // Draw text particles (like "KRIT!")
+                    ctx.font = 'bold 16px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 3;
+                    ctx.strokeText(p.text, p.x, p.y);
+                    ctx.fillText(p.text, p.x, p.y);
+                } else {
+                    const size = p.size || 3;
+                    ctx.shadowBlur = 5;
+                    ctx.shadowColor = p.color;
+                    ctx.fillRect(p.x - size/2, p.y - size/2, size, size);
+                }
             }
 
             ctx.globalAlpha = 1;
@@ -5296,6 +5698,93 @@
             if (game.currentRoom % 10 === 0 && game.monsters.length > 0) {
                 ctx.fillStyle = '#fbbf24';
                 ctx.fillText('BOSS!', canvas.width - padding, padding + 44);
+            }
+
+            // Boss health bar (large, centered at top)
+            const boss = game.monsters.find(m => m.isBoss);
+            if (boss) {
+                const bossBarWidth = 400;
+                const bossBarHeight = 24;
+                const bossBarX = (canvas.width - bossBarWidth) / 2;
+                const bossBarY = 50;
+
+                // Background
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fillRect(bossBarX - 10, bossBarY - 25, bossBarWidth + 20, bossBarHeight + 35);
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(bossBarX - 10, bossBarY - 25, bossBarWidth + 20, bossBarHeight + 35);
+
+                // Boss name
+                ctx.font = 'bold 14px "Courier New"';
+                ctx.fillStyle = '#fbbf24';
+                ctx.textAlign = 'center';
+                ctx.fillText(`☠ ${boss.name} ☠`, canvas.width / 2, bossBarY - 8);
+
+                // Health bar background
+                ctx.fillStyle = '#1a1a2a';
+                ctx.fillRect(bossBarX, bossBarY, bossBarWidth, bossBarHeight);
+
+                // Health bar fill
+                const bossHpPercent = Math.max(0, boss.hp / boss.maxHp);
+                const gradient = ctx.createLinearGradient(bossBarX, bossBarY, bossBarX + bossBarWidth, bossBarY);
+                gradient.addColorStop(0, '#dc2626');
+                gradient.addColorStop(0.5, '#ef4444');
+                gradient.addColorStop(1, '#f87171');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(bossBarX + 2, bossBarY + 2, (bossBarWidth - 4) * bossHpPercent, bossBarHeight - 4);
+
+                // Health text
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 12px "Courier New"';
+                ctx.fillText(`${Math.max(0, Math.floor(boss.hp))} / ${boss.maxHp}`, canvas.width / 2, bossBarY + 16);
+
+                // Boss shield indicator
+                if (boss.shieldActive) {
+                    ctx.fillStyle = '#60a5fa';
+                    ctx.fillText('🛡️ SHIELD', canvas.width / 2, bossBarY + 45);
+                }
+            }
+
+            // Ability cooldowns display (bottom-right corner)
+            const abilitiesX = canvas.width - 90;
+            const abilitiesY = canvas.height - 85;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.fillRect(abilitiesX - 5, abilitiesY - 5, 90, 80);
+
+            ctx.font = 'bold 10px "Courier New"';
+            ctx.textAlign = 'left';
+
+            // Dash ability (Shift)
+            const dashReady = game.player.dashCooldown <= 0;
+            ctx.fillStyle = dashReady ? '#60a5fa' : '#444';
+            ctx.fillText('⚡ Dash [Shift]', abilitiesX, abilitiesY + 12);
+            if (!dashReady) {
+                const dashCooldownSec = (game.player.dashCooldown / 60).toFixed(1);
+                ctx.fillStyle = '#888';
+                ctx.fillText(`   ${dashCooldownSec}s`, abilitiesX, abilitiesY + 24);
+            }
+
+            // Spin ability (Q)
+            const spinReady = game.player.spinCooldown <= 0;
+            ctx.fillStyle = spinReady ? '#f97316' : '#444';
+            ctx.fillText('🌀 Spin [Q]', abilitiesX, abilitiesY + 42);
+            if (!spinReady) {
+                const spinCooldownSec = (game.player.spinCooldown / 60).toFixed(1);
+                ctx.fillStyle = '#888';
+                ctx.fillText(`   ${spinCooldownSec}s`, abilitiesX, abilitiesY + 54);
+            }
+
+            // Status effects on player
+            if (game.player.statusEffects && game.player.statusEffects.length > 0) {
+                ctx.fillStyle = '#fff';
+                ctx.fillText('Status:', abilitiesX, abilitiesY + 70);
+                let statusX = abilitiesX + 45;
+                for (const effect of game.player.statusEffects) {
+                    const icons = { poison: '☠️', burn: '🔥', freeze: '❄️' };
+                    ctx.fillText(icons[effect.type] || '?', statusX, abilitiesY + 70);
+                    statusX += 15;
+                }
             }
 
             // Equipped items info (bottom-left)
@@ -5662,6 +6151,8 @@
             updateProjectiles();
             updateBombs();
             updateParticles();
+            updateStatusEffects();
+            updatePlayerAbilities();
             updateAbilitiesUI();
 
             if (game.keys.e && !game.player.isDying) {
@@ -5712,6 +6203,18 @@
             if (e.key === ' ' && !game.spacePressed) {
                 game.spacePressed = true;
                 playerAttack();
+                e.preventDefault();
+            }
+
+            // Shift for dash
+            if (e.key === 'Shift' && !game.player.isDying && game.player.dashCooldown <= 0 && !game.player.isDashing) {
+                executeDash();
+                e.preventDefault();
+            }
+
+            // Q for spin attack
+            if ((e.key === 'q' || e.key === 'Q') && !game.player.isDying && game.player.spinCooldown <= 0 && !game.player.isSpinning) {
+                executeSpinAttack();
                 e.preventDefault();
             }
 
@@ -5917,6 +6420,107 @@
             }
         }
 
+        // Auto-save function (called every 5 rooms)
+        function autoSave() {
+            const saveData = {
+                version: 1,
+                timestamp: Date.now(),
+                difficulty: game.difficulty,
+                player: {
+                    x: game.player.x,
+                    y: game.player.y,
+                    hp: game.player.hp,
+                    maxHp: game.player.maxHp,
+                    attack: game.player.attack,
+                    baseAttack: game.player.baseAttack,
+                    defense: game.player.defense,
+                    baseDefense: game.player.baseDefense,
+                    gold: game.player.gold,
+                    xp: game.player.xp,
+                    xpToNext: game.player.xpToNext,
+                    level: game.player.level,
+                    inventory: game.player.inventory,
+                    equippedWeapon: game.player.equippedWeapon,
+                    equippedArmor: game.player.equippedArmor
+                },
+                currentRoom: game.currentRoom,
+                roomsCleared: game.roomsCleared,
+                monstersKilled: game.monstersKilled
+            };
+
+            try {
+                localStorage.setItem('dungeonCrawlerAutoSave', JSON.stringify(saveData));
+                addLog('💾 Auto-Save...', 'info');
+            } catch (e) {
+                // Silent fail for auto-save
+            }
+        }
+
+        // Check for auto-save and show continue prompt
+        function checkAutoSave() {
+            try {
+                const autoSaveStr = localStorage.getItem('dungeonCrawlerAutoSave');
+                if (!autoSaveStr) return false;
+
+                const saveData = JSON.parse(autoSaveStr);
+                const saveDate = new Date(saveData.timestamp).toLocaleString('de-DE');
+
+                // Show continue dialog
+                if (confirm(`Auto-Save gefunden!\nLevel ${saveData.player.level}, Raum ${saveData.currentRoom}\nVom: ${saveDate}\n\nFortsetzen?`)) {
+                    loadAutoSave(saveData);
+                    return true;
+                } else {
+                    // Player chose not to continue, delete auto-save
+                    localStorage.removeItem('dungeonCrawlerAutoSave');
+                    return false;
+                }
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function loadAutoSave(saveData) {
+            // Restore player data
+            game.player.hp = saveData.player.hp;
+            game.player.maxHp = saveData.player.maxHp;
+            game.player.attack = saveData.player.attack;
+            game.player.baseAttack = saveData.player.baseAttack;
+            game.player.defense = saveData.player.defense;
+            game.player.baseDefense = saveData.player.baseDefense;
+            game.player.gold = saveData.player.gold;
+            game.player.xp = saveData.player.xp;
+            game.player.xpToNext = saveData.player.xpToNext;
+            game.player.level = saveData.player.level;
+            game.player.inventory = saveData.player.inventory || [];
+            game.player.equippedWeapon = saveData.player.equippedWeapon || null;
+            game.player.equippedArmor = saveData.player.equippedArmor || null;
+
+            // Restore game state
+            game.currentRoom = saveData.currentRoom;
+            game.roomsCleared = saveData.roomsCleared || 0;
+            game.monstersKilled = saveData.monstersKilled || 0;
+            game.difficulty = saveData.difficulty || 'normal';
+
+            // Update difficulty selector
+            document.getElementById('difficultySelect').value = game.difficulty;
+
+            // Regenerate room
+            generateWalls();
+            spawnMonsters();
+            spawnItems();
+
+            // Set player position
+            game.player.x = canvas.width / 2;
+            game.player.y = canvas.height - 50;
+            game.player.spawnProtection = 180;
+
+            updateInventory();
+            updateUI();
+
+            addLog(`📂 Auto-Save geladen! Level ${game.player.level}, Raum ${game.currentRoom}`, 'loot');
+            sfx.levelUp();
+        }
+
         function loadGame() {
             try {
                 const saveStr = localStorage.getItem('dungeonCrawlerSave');
@@ -5970,6 +6574,31 @@
         document.getElementById('saveButton').addEventListener('click', saveGame);
         document.getElementById('loadButton').addEventListener('click', loadGame);
         document.getElementById('highscoreButton').addEventListener('click', showHighscoreMenu);
+
+        // Difficulty selector
+        document.getElementById('difficultySelect').addEventListener('change', (e) => {
+            game.difficulty = e.target.value;
+            const info = document.getElementById('difficultyInfo');
+            const descriptions = {
+                easy: 'Monster: -30% HP/ATK, +20% Drops',
+                normal: 'Monster: Normal',
+                hard: 'Monster: +50% HP, +30% ATK, -20% Drops'
+            };
+            info.textContent = descriptions[game.difficulty];
+            addLog(`Schwierigkeit: ${game.difficulty.charAt(0).toUpperCase() + game.difficulty.slice(1)}`, 'info');
+        });
+
+        // Get difficulty multipliers
+        function getDifficultyMultipliers() {
+            switch (game.difficulty) {
+                case 'easy':
+                    return { hp: 0.7, attack: 0.7, defense: 0.8, dropRate: 1.2, gold: 1.2 };
+                case 'hard':
+                    return { hp: 1.5, attack: 1.3, defense: 1.2, dropRate: 0.8, gold: 0.7 };
+                default: // normal
+                    return { hp: 1, attack: 1, defense: 1, dropRate: 1, gold: 1 };
+            }
+        }
 
         // ==================== MUSIK SYSTEM ====================
         const music = {
@@ -7129,7 +7758,7 @@
             if (command === '/help' || command === '/h' || command === '/?') {
                 addCommandOutput('=== BEFEHLE ===', 'info');
                 addCommandOutput('/give *name* - Item suchen & geben', 'info');
-                addCommandOutput('/list weapons|armor|monsters', 'info');
+                addCommandOutput('/list weapons|armor|monsters|bosses', 'info');
                 addCommandOutput('/spawn goblin|skeleton|orc|mage|demon|boss [el1|el2|el3]', 'info');
                 addCommandOutput('/skip [anzahl] - Level überspringen', 'info');
                 addCommandOutput('/heal - Voll heilen', 'info');
@@ -7140,6 +7769,12 @@
                 addCommandOutput('/tp [x] [y] - Teleportieren', 'info');
                 addCommandOutput('/clear - Items löschen', 'info');
                 addCommandOutput('/speed [wert] - Spieler-Speed', 'info');
+                addCommandOutput('--- NEUE BEFEHLE ---', 'info');
+                addCommandOutput('/crit [chance] - Krit-Chance (0-1)', 'info');
+                addCommandOutput('/status poison|burn|freeze - Status auf Monster', 'info');
+                addCommandOutput('/nocooldown - Fähigkeiten-Cooldowns zurücksetzen', 'info');
+                addCommandOutput('/difficulty easy|normal|hard', 'info');
+                addCommandOutput('/autosave - Auto-Save löschen', 'info');
                 return;
             }
 
@@ -7154,8 +7789,11 @@
                 } else if (listType === 'monsters' || listType === 'm') {
                     addCommandOutput('=== MONSTER ===', 'info');
                     monsterTypes.forEach(m => addCommandOutput(`${m.name} (${m.style})`, 'info'));
+                } else if (listType === 'bosses' || listType === 'b') {
+                    addCommandOutput('=== BOSSE ===', 'info');
+                    bossTypes.forEach((b, i) => addCommandOutput(`${i+1}. ${b.name} (HP: ${b.hp}, ATK: ${b.attack})`, 'info'));
                 } else {
-                    addCommandOutput('Nutzung: /list weapons|armor|monsters', 'error');
+                    addCommandOutput('Nutzung: /list weapons|armor|monsters|bosses', 'error');
                 }
                 return;
             }
@@ -7261,6 +7899,68 @@
                 const spd = parseFloat(parts[1]) || 4;
                 game.player.speed = Math.max(1, Math.min(20, spd));
                 addCommandOutput(`✅ Speed: ${game.player.speed}`, 'success');
+                return;
+            }
+
+            // NEW COMMANDS
+            if (command === '/crit') {
+                const chance = parseFloat(parts[1]);
+                if (isNaN(chance)) {
+                    addCommandOutput(`Aktuelle Krit-Chance: ${(game.player.critChance * 100).toFixed(0)}%`, 'info');
+                } else {
+                    game.player.critChance = Math.max(0, Math.min(1, chance));
+                    addCommandOutput(`✅ Krit-Chance: ${(game.player.critChance * 100).toFixed(0)}%`, 'success');
+                }
+                return;
+            }
+
+            if (command === '/status') {
+                const statusType = parts[1];
+                const validTypes = ['poison', 'burn', 'freeze'];
+                if (!validTypes.includes(statusType)) {
+                    addCommandOutput('Nutzung: /status poison|burn|freeze', 'error');
+                    return;
+                }
+
+                const effects = {
+                    poison: { type: 'poison', damage: 5, duration: 300, chance: 1 },
+                    burn: { type: 'burn', damage: 8, duration: 180, chance: 1 },
+                    freeze: { type: 'freeze', slowAmount: 0.3, duration: 240, chance: 1 }
+                };
+
+                let count = 0;
+                for (const monster of game.monsters) {
+                    applyStatusEffect(monster, effects[statusType]);
+                    count++;
+                }
+                addCommandOutput(`✅ ${statusType} auf ${count} Monster angewendet!`, 'success');
+                return;
+            }
+
+            if (command === '/nocooldown' || command === '/nocd') {
+                game.player.dashCooldown = 0;
+                game.player.spinCooldown = 0;
+                game.player.attackCooldown = 0;
+                addCommandOutput('✅ Alle Cooldowns zurückgesetzt!', 'success');
+                return;
+            }
+
+            if (command === '/difficulty' || command === '/diff') {
+                const diff = parts[1];
+                if (['easy', 'normal', 'hard'].includes(diff)) {
+                    game.difficulty = diff;
+                    document.getElementById('difficultySelect').value = diff;
+                    addCommandOutput(`✅ Schwierigkeit: ${diff}`, 'success');
+                } else {
+                    addCommandOutput(`Aktuelle Schwierigkeit: ${game.difficulty}`, 'info');
+                    addCommandOutput('Nutzung: /difficulty easy|normal|hard', 'info');
+                }
+                return;
+            }
+
+            if (command === '/autosave') {
+                localStorage.removeItem('dungeonCrawlerAutoSave');
+                addCommandOutput('✅ Auto-Save gelöscht!', 'success');
                 return;
             }
 
@@ -7430,11 +8130,15 @@
         });
         // ==================== END SECRET MENU ====================
 
-        // Initialize
-        generateRoom();
-        spawnMonsters();
-        spawnItems();
-        addLog('Willkommen im Dungeon! Besiege alle Monster!', 'info');
+        // Initialize - check for auto-save first
+        if (!checkAutoSave()) {
+            // No auto-save, start new game
+            generateRoom();
+            spawnMonsters();
+            spawnItems();
+            addLog('Willkommen im Dungeon! Besiege alle Monster!', 'info');
+            addLog('⚡ Shift = Dash | 🌀 Q = Wirbelschlag', 'info');
+        }
         gameLoop();
     </script>
 </body>
