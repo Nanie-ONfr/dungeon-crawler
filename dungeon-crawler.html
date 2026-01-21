@@ -147,13 +147,34 @@
 
         #gameControls {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 8px;
         }
 
         #gameControls .button {
-            flex: 1;
+            flex: 0 1 auto;
+            min-width: auto;
             margin: 0;
+            padding: 4px 6px;
+            font-size: 10px;
+            background: linear-gradient(180deg, #2a1a3e 0%, #1a0a2e 100%);
+            border: 2px solid #4a2a6e;
+            border-radius: 3px;
+            box-shadow: 0 2px 0 #0a0015, inset 0 1px 0 rgba(255,255,255,0.1);
+            text-shadow: 1px 1px 1px #000;
+            color: #e8d4f0;
+        }
+
+        #gameControls .button:hover {
+            background: linear-gradient(180deg, #3a2a4e 0%, #2a1a3e 100%);
+            border-color: #6a4a8e;
+            color: #fff;
+        }
+
+        #gameControls .button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 0 #0a0015;
         }
 
         .log-message {
@@ -378,10 +399,16 @@
             <div id="canvasContainer">
                 <canvas id="gameCanvas" width="900" height="550"></canvas>
                 <div id="gameControls">
-                    <button class="button" id="fullscreenButton">🖥️ Vollbild</button>
-                    <button class="button" id="healButton">🧪 Heiltrank (50 Gold)</button>
-                    <button class="button" id="musicButton">🔇 Musik Aus</button>
-                    <button class="button" id="sfxButton">🔊 SFX An</button>
+                    <button class="button" id="fullscreenButton">🖥️</button>
+                    <button class="button" id="healButton">🧪50G</button>
+                    <button class="button" id="fullHealButton">💖--G</button>
+                    <button class="button" id="attackBoostButton">⚔️75G</button>
+                    <button class="button" id="defenseBoostButton">🛡️75G</button>
+                    <button class="button" id="buyBombButton">💣40G</button>
+                    <button class="button" id="saveButton">💾</button>
+                    <button class="button" id="loadButton">📂</button>
+                    <button class="button" id="musicButton">🔇</button>
+                    <button class="button" id="sfxButton">🔊</button>
                 </div>
                 <div id="log"></div>
             </div>
@@ -1045,7 +1072,8 @@
                 case 'groundSlam':
                     // Area damage around boss
                     if (playerDist < 150) {
-                        const damage = Math.max(1, Math.floor(boss.attack * 0.6) - game.player.defense);
+                        const totalDef = game.player.defense + (game.player.defenseBoost || 0);
+                        const damage = Math.max(1, Math.floor(boss.attack * 0.6) - totalDef);
                         game.player.hp = Math.max(0, game.player.hp - damage);
                         game.player.flashTimer = 20;
                         game.screenShake = 20;
@@ -1163,7 +1191,8 @@
                     boss.y = dashY;
                     // Damage if player was in path
                     if (playerDist < dashDist) {
-                        const damage = Math.max(1, Math.floor(boss.attack * 0.7) - game.player.defense);
+                        const totalDef = game.player.defense + (game.player.defenseBoost || 0);
+                        const damage = Math.max(1, Math.floor(boss.attack * 0.7) - totalDef);
                         game.player.hp = Math.max(0, game.player.hp - damage);
                         game.player.flashTimer = 15;
                         addLog(`🌑 ${boss.name} durchbohrt dich! ${damage} Schaden!`, 'combat');
@@ -1199,7 +1228,8 @@
                     addLog(`🌋 ${boss.name} erschüttert die Erde!`, 'combat');
                     // Damage all in range and create obstacles
                     if (playerDist < 250) {
-                        const damage = Math.max(1, Math.floor(boss.attack * 0.5) - game.player.defense);
+                        const totalDef = game.player.defense + (game.player.defenseBoost || 0);
+                        const damage = Math.max(1, Math.floor(boss.attack * 0.5) - totalDef);
                         game.player.hp = Math.max(0, game.player.hp - damage);
                         game.player.flashTimer = 20;
                         addLog(`Du nimmst ${damage} Schaden vom Erdbeben!`, 'combat');
@@ -1245,7 +1275,8 @@
                                 if (game.player.isDying) return;
                                 const distToTarget = Math.hypot(game.player.x - targetX, game.player.y - targetY);
                                 if (distToTarget < 50) {
-                                    const damage = Math.max(1, Math.floor(boss.attack * 0.8) - game.player.defense);
+                                    const totalDef = game.player.defense + (game.player.defenseBoost || 0);
+                                    const damage = Math.max(1, Math.floor(boss.attack * 0.8) - totalDef);
                                     game.player.hp = Math.max(0, game.player.hp - damage);
                                     game.player.flashTimer = 20;
                                     game.screenShake = 15;
@@ -1472,9 +1503,33 @@
 
             if (!item) return;
 
+            // Find valid spawn position (not in wall)
+            let itemX = monster.x;
+            let itemY = monster.y;
+
+            // If monster position is in a wall, find nearby valid position
+            if (isInWall(itemX, itemY, 15)) {
+                let found = false;
+                // Try positions in expanding circle
+                for (let radius = 20; radius <= 100 && !found; radius += 20) {
+                    for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
+                        const testX = monster.x + Math.cos(angle) * radius;
+                        const testY = monster.y + Math.sin(angle) * radius;
+                        if (!isInWall(testX, testY, 15) &&
+                            testX > 50 && testX < canvas.width - 50 &&
+                            testY > 50 && testY < canvas.height - 50) {
+                            itemX = testX;
+                            itemY = testY;
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
             // Spawn with drop animation
-            item.x = monster.x;
-            item.y = monster.y;
+            item.x = itemX;
+            item.y = itemY;
             item.size = 12;
             item.animOffset = Math.random() * Math.PI * 2;
             item.dropAnim = 20;  // Drop animation frames
@@ -1605,7 +1660,8 @@
                         // Impact damage
                         const landDist = Math.hypot(game.player.x - monster.x, game.player.y - monster.y);
                         if (landDist < 60 && !game.player.isDying && game.player.spawnProtection <= 0) {
-                            const damage = Math.max(1, Math.floor(monster.attack * 0.8) - game.player.defense);
+                            const totalDef = game.player.defense + (game.player.defenseBoost || 0);
+                            const damage = Math.max(1, Math.floor(monster.attack * 0.8) - totalDef);
                             game.player.hp = Math.max(0, game.player.hp - damage);
                             game.player.flashTimer = 20;
                             addLog(`💥 ${monster.name} landet auf dir! ${damage} Schaden!`, 'combat');
@@ -1720,7 +1776,8 @@
                     if (Math.random() < 0.02) {
                         // Boss melee bonus damage
                         const meleeBonus = monster.isBoss ? (monster.meleeBonus || 0) : 0;
-                        const damage = Math.max(1, monster.attack + meleeBonus - game.player.defense);
+                        const totalDefense = game.player.defense + (game.player.defenseBoost || 0);
+                        const damage = Math.max(1, monster.attack + meleeBonus - totalDefense);
                         game.player.hp = Math.max(0, game.player.hp - damage);
                         game.player.flashTimer = 15;  // Player damage flash
                         game.screenShake = monster.isBoss ? 15 : 10;  // Stronger shake for boss
@@ -1777,7 +1834,8 @@
                 if (proj.fromMonster && !game.player.isDying && game.player.spawnProtection <= 0) {
                     const distToPlayer = Math.hypot(proj.x - game.player.x, proj.y - game.player.y);
                     if (distToPlayer < 20) {
-                        const damage = Math.max(1, proj.damage - game.player.defense);
+                        const totalDef = game.player.defense + (game.player.defenseBoost || 0);
+                        const damage = Math.max(1, proj.damage - totalDef);
                         game.player.hp = Math.max(0, game.player.hp - damage);
                         game.player.flashTimer = 15;
                         game.screenShake = 8;
@@ -2049,7 +2107,8 @@
             }
 
             if (closest) {
-                let damage = Math.max(1, game.player.attack - closest.defense);
+                const totalAttack = game.player.attack + (game.player.attackBoost || 0);
+                let damage = Math.max(1, totalAttack - closest.defense);
                 // Boss shield reduces damage by 50%
                 if (closest.isBoss && closest.shieldActive) {
                     damage = Math.max(1, Math.floor(damage * 0.5));
@@ -2310,10 +2369,25 @@
             };
             delete droppedItem.count;
 
-            // Check if position is in wall, adjust if needed
+            // Check if position is in wall, find valid nearby position
             if (isInWall(droppedItem.x, droppedItem.y, 10)) {
-                droppedItem.x = game.player.x;
-                droppedItem.y = game.player.y + 30;
+                let found = false;
+                for (let radius = 20; radius <= 80 && !found; radius += 20) {
+                    for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+                        const testX = game.player.x + Math.cos(a) * radius;
+                        const testY = game.player.y + Math.sin(a) * radius;
+                        if (!isInWall(testX, testY, 10)) {
+                            droppedItem.x = testX;
+                            droppedItem.y = testY;
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    droppedItem.x = game.player.x;
+                    droppedItem.y = game.player.y;
+                }
             }
 
             game.items.push(droppedItem);
@@ -4579,6 +4653,7 @@
 
             draw();
             updateUI();
+            if (typeof updateFullHealButton === 'function') updateFullHealButton();
 
             requestAnimationFrame(gameLoop);
         }
@@ -4640,6 +4715,196 @@
                 addLog('Nicht genug Gold!', 'combat');
             }
         });
+
+        // Voll-Heal Button - Preis basiert auf fehlenden HP (2 Gold pro fehlender HP, min 10)
+        function getFullHealPrice() {
+            const missingHp = game.player.maxHp - game.player.hp;
+            return Math.max(10, Math.floor(missingHp * 2));
+        }
+
+        function updateFullHealButton() {
+            const price = getFullHealPrice();
+            const btn = document.getElementById('fullHealButton');
+            btn.textContent = `💖${price}G`;
+        }
+
+        document.getElementById('fullHealButton').addEventListener('click', () => {
+            const price = getFullHealPrice();
+            if (game.player.hp >= game.player.maxHp) {
+                addLog('Du hast bereits volle HP!', 'info');
+                return;
+            }
+            if (game.player.gold >= price) {
+                game.player.gold -= price;
+                const healAmount = game.player.maxHp - game.player.hp;
+                game.player.hp = game.player.maxHp;
+                game.player.isDrinking = true;
+                game.player.drinkFrame = 0;
+                game.player.drinkHeal = healAmount;
+                game.player.drinkColor = '#ff69b4';
+                sfx.heal();
+                addLog(`Voll-Heal für ${price}G! +${healAmount} HP`, 'loot');
+                updateFullHealButton();
+            } else {
+                addLog(`Nicht genug Gold! (${price} benötigt)`, 'combat');
+            }
+        });
+
+        // Stärke-Boost Button (75 Gold) - +50% Angriff für 30 Sekunden
+        document.getElementById('attackBoostButton').addEventListener('click', () => {
+            if (game.player.gold >= 75) {
+                game.player.gold -= 75;
+                const boostAmount = Math.floor(game.player.attack * 0.5);
+                game.player.attackBoost = (game.player.attackBoost || 0) + boostAmount;
+                game.player.isDrinking = true;
+                game.player.drinkFrame = 0;
+                game.player.drinkHeal = 0;
+                game.player.drinkColor = '#ff4500';
+                sfx.powerUp();
+                addLog(`⚔️ Stärkungstrank! +${boostAmount} Angriff für 30s!`, 'loot');
+                setTimeout(() => {
+                    game.player.attackBoost = Math.max(0, (game.player.attackBoost || 0) - boostAmount);
+                    addLog('⚔️ Stärkungseffekt ist abgelaufen.', 'info');
+                }, 30000);
+            } else {
+                addLog('Nicht genug Gold! (75 benötigt)', 'combat');
+            }
+        });
+
+        // Schutz-Boost Button (75 Gold) - +50% Verteidigung für 30 Sekunden
+        document.getElementById('defenseBoostButton').addEventListener('click', () => {
+            if (game.player.gold >= 75) {
+                game.player.gold -= 75;
+                const boostAmount = Math.floor(game.player.defense * 0.5) + 5;
+                game.player.defenseBoost = (game.player.defenseBoost || 0) + boostAmount;
+                game.player.isDrinking = true;
+                game.player.drinkFrame = 0;
+                game.player.drinkHeal = 0;
+                game.player.drinkColor = '#4169e1';
+                sfx.powerUp();
+                addLog(`🛡️ Schutztrank! +${boostAmount} Verteidigung für 30s!`, 'loot');
+                setTimeout(() => {
+                    game.player.defenseBoost = Math.max(0, (game.player.defenseBoost || 0) - boostAmount);
+                    addLog('🛡️ Schutzeffekt ist abgelaufen.', 'info');
+                }, 30000);
+            } else {
+                addLog('Nicht genug Gold! (75 benötigt)', 'combat');
+            }
+        });
+
+        // Bombe kaufen Button (40 Gold)
+        document.getElementById('buyBombButton').addEventListener('click', () => {
+            if (game.player.gold >= 40) {
+                game.player.gold -= 40;
+                // Find empty slot or add to existing bombs
+                let added = false;
+                for (let i = 0; i < game.player.inventory.length; i++) {
+                    if (!game.player.inventory[i]) {
+                        const bomb = { ...selectByRarity(itemTypes.bombs) };
+                        game.player.inventory[i] = bomb;
+                        added = true;
+                        break;
+                    }
+                }
+                if (added) {
+                    sfx.pickup();
+                    addLog('💣 Bombe gekauft!', 'loot');
+                } else {
+                    game.player.gold += 40; // Refund
+                    addLog('Inventar voll!', 'combat');
+                }
+            } else {
+                addLog('Nicht genug Gold! (40 benötigt)', 'combat');
+            }
+        });
+
+        // ==================== SPEICHER SYSTEM ====================
+        function saveGame() {
+            const saveData = {
+                version: 1,
+                timestamp: Date.now(),
+                player: {
+                    x: game.player.x,
+                    y: game.player.y,
+                    hp: game.player.hp,
+                    maxHp: game.player.maxHp,
+                    attack: game.player.attack,
+                    baseAttack: game.player.baseAttack,
+                    defense: game.player.defense,
+                    baseDefense: game.player.baseDefense,
+                    gold: game.player.gold,
+                    xp: game.player.xp,
+                    xpToNext: game.player.xpToNext,
+                    level: game.player.level,
+                    inventory: game.player.inventory,
+                    equipment: game.player.equipment
+                },
+                currentRoom: game.currentRoom,
+                roomsCleared: game.roomsCleared,
+                monstersKilled: game.monstersKilled
+            };
+
+            try {
+                localStorage.setItem('dungeonCrawlerSave', JSON.stringify(saveData));
+                addLog('💾 Spiel gespeichert!', 'info');
+                sfx.pickup();
+            } catch (e) {
+                addLog('Fehler beim Speichern!', 'combat');
+            }
+        }
+
+        function loadGame() {
+            try {
+                const saveStr = localStorage.getItem('dungeonCrawlerSave');
+                if (!saveStr) {
+                    addLog('Kein Spielstand gefunden!', 'combat');
+                    return false;
+                }
+
+                const saveData = JSON.parse(saveStr);
+
+                // Restore player data
+                game.player.x = saveData.player.x;
+                game.player.y = saveData.player.y;
+                game.player.hp = saveData.player.hp;
+                game.player.maxHp = saveData.player.maxHp;
+                game.player.attack = saveData.player.attack;
+                game.player.baseAttack = saveData.player.baseAttack;
+                game.player.defense = saveData.player.defense;
+                game.player.baseDefense = saveData.player.baseDefense;
+                game.player.gold = saveData.player.gold;
+                game.player.xp = saveData.player.xp;
+                game.player.xpToNext = saveData.player.xpToNext;
+                game.player.level = saveData.player.level;
+                game.player.inventory = saveData.player.inventory || [];
+                game.player.equipment = saveData.player.equipment || {};
+
+                game.currentRoom = saveData.currentRoom;
+                game.roomsCleared = saveData.roomsCleared;
+                game.monstersKilled = saveData.monstersKilled;
+
+                // Regenerate room with correct level
+                generateWalls();
+                spawnMonsters();
+                spawnItems();
+
+                updateInventory();
+                updateUI();
+
+                const saveDate = new Date(saveData.timestamp).toLocaleString('de-DE');
+                addLog(`📂 Spielstand geladen! (${saveDate})`, 'loot');
+                addLog(`Level ${game.player.level}, Raum ${game.currentRoom}`, 'info');
+                sfx.levelUp();
+
+                return true;
+            } catch (e) {
+                addLog('Fehler beim Laden!', 'combat');
+                return false;
+            }
+        }
+
+        document.getElementById('saveButton').addEventListener('click', saveGame);
+        document.getElementById('loadButton').addEventListener('click', loadGame);
 
         // ==================== MUSIK SYSTEM ====================
         const music = {
