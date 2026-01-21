@@ -6697,7 +6697,7 @@
 
             if (command === '/help' || command === '/h' || command === '/?') {
                 addCommandOutput('=== BEFEHLE ===', 'info');
-                addCommandOutput('/give weapon|armor|potion|bomb|gold [name/menge]', 'info');
+                addCommandOutput('/give *name* - Item suchen & geben', 'info');
                 addCommandOutput('/list weapons|armor|monsters', 'info');
                 addCommandOutput('/spawn goblin|skeleton|orc|mage|demon|boss [el1|el2|el3]', 'info');
                 addCommandOutput('/skip [anzahl] - Level überspringen', 'info');
@@ -6829,41 +6829,57 @@
             }
 
             if (command === '/give' || command === '/g') {
-                const type = parts[1];
-                const itemName = parts.slice(2).join(' ');
+                const itemName = parts.slice(1).join(' ').toLowerCase();
 
-                if (type === 'weapon' || type === 'w') {
-                    const weapons = getAllWeapons();
-                    const weapon = weapons.find(w => w.name.toLowerCase().includes(itemName));
-                    if (weapon) {
-                        game.player.equippedWeapon = { ...weapon };
-                        game.player.attack = game.player.baseAttack + weapon.attack;
-                        addCommandOutput(`✅ ${weapon.name} ausgerüstet!`, 'success');
-                    } else {
-                        addCommandOutput(`❌ "${itemName}" nicht gefunden`, 'error');
-                    }
-                } else if (type === 'armor' || type === 'a') {
-                    const armor = itemTypes.armor.find(a => a.name.toLowerCase().includes(itemName));
-                    if (armor) {
-                        game.player.equippedArmor = { ...armor };
-                        game.player.defense = game.player.baseDefense + armor.defense;
-                        addCommandOutput(`✅ ${armor.name} ausgerüstet!`, 'success');
-                    } else {
-                        addCommandOutput(`❌ "${itemName}" nicht gefunden`, 'error');
-                    }
-                } else if (type === 'potion' || type === 'p') {
-                    game.player.inventory.push({ ...itemTypes.potions[2] });
-                    addCommandOutput('✅ Großer Heiltrank erhalten!', 'success');
-                } else if (type === 'bomb' || type === 'b') {
-                    game.player.inventory.push({ ...itemTypes.bombs[1] });
-                    addCommandOutput('✅ Große Bombe erhalten!', 'success');
-                } else if (type === 'gold') {
+                if (!itemName) {
+                    addCommandOutput('/give *name* oder /give gold *menge*', 'error');
+                    return;
+                }
+
+                // Check for gold
+                if (itemName === 'gold' || itemName.startsWith('gold ')) {
                     const amount = parseInt(parts[2]) || 1000;
                     game.player.gold += amount;
                     addCommandOutput(`✅ +${amount} Gold!`, 'success');
-                } else {
-                    addCommandOutput('/give weapon|armor|potion|bomb|gold [name]', 'error');
+                    return;
                 }
+
+                // Search weapons
+                const weapons = getAllWeapons();
+                const weapon = weapons.find(w => w.name.toLowerCase().includes(itemName));
+                if (weapon) {
+                    game.player.equippedWeapon = { ...weapon };
+                    game.player.attack = game.player.baseAttack + weapon.attack;
+                    addCommandOutput(`✅ ${weapon.name} ausgerüstet!`, 'success');
+                    return;
+                }
+
+                // Search armor
+                const armor = itemTypes.armor.find(a => a.name.toLowerCase().includes(itemName));
+                if (armor) {
+                    game.player.equippedArmor = { ...armor };
+                    game.player.defense = game.player.baseDefense + armor.defense;
+                    addCommandOutput(`✅ ${armor.name} ausgerüstet!`, 'success');
+                    return;
+                }
+
+                // Search potions
+                const potion = itemTypes.potions.find(p => p.name.toLowerCase().includes(itemName));
+                if (potion) {
+                    game.player.inventory.push({ ...potion });
+                    addCommandOutput(`✅ ${potion.name} erhalten!`, 'success');
+                    return;
+                }
+
+                // Search bombs
+                const bomb = itemTypes.bombs.find(b => b.name.toLowerCase().includes(itemName));
+                if (bomb) {
+                    game.player.inventory.push({ ...bomb });
+                    addCommandOutput(`✅ ${bomb.name} erhalten!`, 'success');
+                    return;
+                }
+
+                addCommandOutput(`❌ "${itemName}" nicht gefunden`, 'error');
                 return;
             }
 
