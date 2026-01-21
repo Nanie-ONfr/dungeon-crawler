@@ -790,6 +790,59 @@
             ]
         };
 
+        // Elite Monster weapon pools (bessere Waffen als normale Monster)
+        const eliteMonsterWeapons = {
+            goblin: [
+                { name: 'Elite-Goblinklinge', attack: 18, type: 'weapon', style: 'sword', range: 75, speed: 0.8, tier: 'rare' },
+                { name: 'Vergifteter Dolch', attack: 15, type: 'weapon', style: 'dagger', range: 55, speed: 0.6, tier: 'rare' },
+                { name: 'Goblin-Assassinenklinge', attack: 22, type: 'weapon', style: 'dagger', range: 60, speed: 0.7, tier: 'epic' }
+            ],
+            skeleton: [
+                { name: 'Verfluchtes Schwert', attack: 20, type: 'weapon', style: 'bone', range: 85, tier: 'rare' },
+                { name: 'Seelenschneider', attack: 25, type: 'weapon', style: 'sword', range: 90, tier: 'epic' },
+                { name: 'Knochensense', attack: 28, type: 'weapon', style: 'battleaxe', range: 95, speed: 1.3, tier: 'epic' }
+            ],
+            orc: [
+                { name: 'Ork-Kriegsaxt', attack: 30, type: 'weapon', style: 'battleaxe', range: 80, speed: 1.4, tier: 'rare' },
+                { name: 'Berserker-Hammer', attack: 35, type: 'weapon', style: 'hammer', range: 75, speed: 1.5, tier: 'epic' },
+                { name: 'Blutdurst', attack: 38, type: 'weapon', style: 'battleaxe', range: 85, speed: 1.3, tier: 'legendary' }
+            ],
+            mage: [
+                { name: 'Erzmagier-Stab', attack: 28, type: 'weapon', style: 'staff', range: 110, tier: 'rare' },
+                { name: 'Stab der Verdammnis', attack: 32, type: 'weapon', style: 'fire_staff', range: 115, tier: 'epic' },
+                { name: 'Seelenstab', attack: 36, type: 'weapon', style: 'staff', range: 120, tier: 'legendary' }
+            ],
+            demon: [
+                { name: 'Höllenfürst-Klaue', attack: 35, type: 'weapon', style: 'claw', range: 70, speed: 0.7, tier: 'rare' },
+                { name: 'Dämonenschwert', attack: 40, type: 'weapon', style: 'flame', range: 90, tier: 'epic' },
+                { name: 'Verderbnis', attack: 45, type: 'weapon', style: 'flame', range: 95, tier: 'legendary' }
+            ]
+        };
+
+        // Elite Monster armor pools (bessere Rüstungen)
+        const eliteMonsterArmors = {
+            goblin: [
+                { name: 'Elite-Goblinrüstung', defense: 8, type: 'armor', style: 'leather', tier: 'rare' },
+                { name: 'Schatten-Leder', defense: 10, type: 'armor', style: 'leather', tier: 'epic' }
+            ],
+            skeleton: [
+                { name: 'Verfluchte Rüstung', defense: 12, type: 'armor', style: 'chain', tier: 'rare' },
+                { name: 'Totenknochen-Panzer', defense: 15, type: 'armor', style: 'plate', tier: 'epic' }
+            ],
+            orc: [
+                { name: 'Ork-Kriegsrüstung', defense: 14, type: 'armor', style: 'plate', tier: 'rare' },
+                { name: 'Berserker-Rüstung', defense: 18, type: 'armor', style: 'plate', tier: 'epic' }
+            ],
+            mage: [
+                { name: 'Erzmagier-Robe', defense: 6, type: 'armor', style: 'leather', tier: 'rare' },
+                { name: 'Robe der Macht', defense: 8, type: 'armor', style: 'leather', tier: 'epic' }
+            ],
+            demon: [
+                { name: 'Dämonenlord-Panzer', defense: 18, type: 'armor', style: 'dragon', tier: 'rare' },
+                { name: 'Höllenfürst-Rüstung', defense: 24, type: 'armor', style: 'plate', tier: 'legendary' }
+            ]
+        };
+
         const monsterTypes = [
             {
                 name: 'Goblin',
@@ -859,6 +912,121 @@
                 speed: 1.3,
                 attackType: 'melee',
                 style: 'demon'
+            },
+            // Hybrid Monsters (erscheinen ab Level 15) - können melee und ranged angreifen
+            {
+                name: 'Hexenmeister',
+                color: '#6b21a8',
+                colorDark: '#581c87',
+                hp: 70,
+                baseAttack: 7,
+                baseDefense: 2,
+                xp: 85,
+                gold: 50,
+                speed: 1.0,
+                attackType: 'hybrid',
+                projectileColor: '#a855f7',
+                projectileSpeed: 5,
+                attackRange: 200,
+                attackCooldown: 90,
+                meleeRange: 50,
+                style: 'mage',
+                minLevel: 15
+            },
+            {
+                name: 'Bandit-Hauptmann',
+                color: '#78350f',
+                colorDark: '#451a03',
+                hp: 65,
+                baseAttack: 9,
+                baseDefense: 3,
+                xp: 75,
+                gold: 55,
+                speed: 1.4,
+                attackType: 'hybrid',
+                projectileColor: '#a3a3a3',
+                projectileSpeed: 7,
+                attackRange: 150,
+                attackCooldown: 100,
+                meleeRange: 60,
+                style: 'skeleton',
+                minLevel: 15
+            },
+            {
+                name: 'Feuer-Elementar',
+                color: '#f97316',
+                colorDark: '#ea580c',
+                hp: 90,
+                baseAttack: 12,
+                baseDefense: 5,
+                xp: 120,
+                gold: 70,
+                speed: 1.1,
+                attackType: 'hybrid',
+                projectileColor: '#ef4444',
+                projectileSpeed: 4,
+                attackRange: 180,
+                attackCooldown: 80,
+                meleeRange: 55,
+                style: 'demon',
+                minLevel: 20
+            },
+            {
+                name: 'Eis-Golem',
+                color: '#22d3ee',
+                colorDark: '#0891b2',
+                hp: 150,
+                baseAttack: 14,
+                baseDefense: 8,
+                xp: 140,
+                gold: 80,
+                speed: 0.7,
+                attackType: 'hybrid',
+                projectileColor: '#67e8f9',
+                projectileSpeed: 5,
+                attackRange: 160,
+                attackCooldown: 110,
+                meleeRange: 60,
+                style: 'orc',
+                minLevel: 20
+            },
+            {
+                name: 'Schattenläufer',
+                color: '#1e1b4b',
+                colorDark: '#0f0d24',
+                hp: 55,
+                baseAttack: 11,
+                baseDefense: 2,
+                xp: 100,
+                gold: 65,
+                speed: 2.0,
+                attackType: 'hybrid',
+                projectileColor: '#4c1d95',
+                projectileSpeed: 8,
+                attackRange: 170,
+                attackCooldown: 70,
+                meleeRange: 45,
+                style: 'demon',
+                minLevel: 18
+            },
+            {
+                name: 'Drachenwelpe',
+                color: '#dc2626',
+                colorDark: '#991b1b',
+                hp: 120,
+                baseAttack: 15,
+                baseDefense: 6,
+                xp: 160,
+                gold: 100,
+                speed: 1.2,
+                attackType: 'hybrid',
+                projectileColor: '#f97316',
+                projectileSpeed: 6,
+                attackRange: 200,
+                attackCooldown: 100,
+                meleeRange: 65,
+                style: 'demon',
+                minLevel: 25
             }
         ];
 
@@ -1120,6 +1288,7 @@
 
         // Boss types for different levels
         const bossTypes = [
+            // Tier 1: Level 10-50
             { name: 'Dungeon Lord', color: '#9333ea', hp: 300, attack: 30, defense: 10, xp: 500, gold: 200, speed: 0.7,
               meleeBonus: 15, specialAttacks: ['jumpAttack', 'groundSlam'], minionType: 'goblin_elite', style: 'demon' },
             { name: 'Skelett-König', color: '#e2e8f0', hp: 400, attack: 40, defense: 15, xp: 800, gold: 350, speed: 0.8,
@@ -1130,6 +1299,7 @@
               meleeBonus: 30, specialAttacks: ['shadowDash', 'darkOrbs'], minionType: 'mage_corrupted', style: 'demon' },
             { name: 'Uralt-Titan', color: '#fbbf24', hp: 1000, attack: 90, defense: 35, xp: 2500, gold: 1000, speed: 0.6,
               meleeBonus: 40, specialAttacks: ['earthquake', 'meteorStrike'], minionType: 'demon_spawn', style: 'demon' },
+            // Tier 2: Level 60-100
             { name: 'Frost-Hexer', color: '#60a5fa', hp: 850, attack: 75, defense: 20, xp: 3000, gold: 1200, speed: 0.8,
               meleeBonus: 25, specialAttacks: ['iceSpikes', 'frostNova'], minionType: 'frost_elemental', style: 'mage' },
             { name: 'Gift-Königin', color: '#22c55e', hp: 750, attack: 85, defense: 18, xp: 3500, gold: 1400, speed: 1.1,
@@ -1139,7 +1309,51 @@
             { name: 'Sturm-Wächter', color: '#fbbf24', hp: 1100, attack: 110, defense: 32, xp: 4500, gold: 1800, speed: 1.3,
               meleeBonus: 45, specialAttacks: ['lightningStrike', 'thunderWave'], minionType: 'storm_elemental', style: 'demon' },
             { name: 'Chaos-Imperator', color: '#a855f7', hp: 1500, attack: 130, defense: 40, xp: 6000, gold: 2500, speed: 1.0,
-              meleeBonus: 55, specialAttacks: ['chaosRift', 'voidBlast'], minionType: 'chaos_spawn', style: 'demon' }
+              meleeBonus: 55, specialAttacks: ['chaosRift', 'voidBlast'], minionType: 'chaos_spawn', style: 'demon' },
+            // Tier 3: Level 110-150
+            { name: 'Nekromant', color: '#4a044e', hp: 1200, attack: 140, defense: 35, xp: 7000, gold: 3000, speed: 0.9,
+              meleeBonus: 50, specialAttacks: ['summonUndead', 'deathWave', 'soulDrain'], minionType: 'skeleton_knight', style: 'mage' },
+            { name: 'Lavabiest', color: '#f97316', hp: 1800, attack: 155, defense: 45, xp: 8000, gold: 3500, speed: 0.7,
+              meleeBonus: 60, specialAttacks: ['lavaPool', 'fireBreath', 'eruption'], minionType: 'fire_imp', style: 'demon' },
+            { name: 'Eiskönig', color: '#0ea5e9', hp: 1600, attack: 145, defense: 50, xp: 8500, gold: 3800, speed: 0.8,
+              meleeBonus: 55, specialAttacks: ['blizzard', 'iceSpikes', 'freezeAura'], minionType: 'frost_elemental', style: 'skeleton' },
+            { name: 'Seelenfresser', color: '#6b21a8', hp: 1400, attack: 170, defense: 30, xp: 9000, gold: 4000, speed: 1.2,
+              meleeBonus: 65, specialAttacks: ['soulDrain', 'terrorScream', 'shadowClones'], minionType: 'wraith', style: 'demon' },
+            { name: 'Kriegsherr', color: '#78350f', hp: 2200, attack: 160, defense: 60, xp: 9500, gold: 4200, speed: 0.6,
+              meleeBonus: 70, specialAttacks: ['battleCry', 'shieldBash', 'whirlwind'], minionType: 'orc_berserker', style: 'orc' },
+            // Tier 4: Level 160-200
+            { name: 'Void-Wanderer', color: '#312e81', hp: 1900, attack: 185, defense: 40, xp: 10000, gold: 4500, speed: 1.1,
+              meleeBonus: 75, specialAttacks: ['voidBlast', 'dimensionRift', 'darkPulse'], minionType: 'void_spawn', style: 'demon' },
+            { name: 'Phönix-Lord', color: '#fbbf24', hp: 2000, attack: 175, defense: 35, xp: 11000, gold: 5000, speed: 1.3,
+              meleeBonus: 70, specialAttacks: ['fireBreath', 'rebirth', 'inferno'], minionType: 'fire_imp', style: 'demon' },
+            { name: 'Kristall-Golem', color: '#67e8f9', hp: 3000, attack: 150, defense: 80, xp: 12000, gold: 5500, speed: 0.4,
+              meleeBonus: 80, specialAttacks: ['crystalShards', 'reflectShield', 'earthquake'], minionType: 'crystal_shard', style: 'demon' },
+            { name: 'Giftdrache', color: '#84cc16', hp: 2400, attack: 195, defense: 45, xp: 13000, gold: 6000, speed: 1.0,
+              meleeBonus: 85, specialAttacks: ['poisonCloud', 'acidBreath', 'toxicRain'], minionType: 'poison_spider', style: 'demon' },
+            { name: 'Zeitwächter', color: '#e0e7ff', hp: 2100, attack: 180, defense: 55, xp: 14000, gold: 6500, speed: 1.4,
+              meleeBonus: 75, specialAttacks: ['timeFreeze', 'chronoBlast', 'rewind'], minionType: 'time_phantom', style: 'mage' },
+            // Tier 5: Level 210-250
+            { name: 'Hydra', color: '#14b8a6', hp: 3500, attack: 200, defense: 50, xp: 15000, gold: 7000, speed: 0.8,
+              meleeBonus: 90, specialAttacks: ['multiHead', 'acidSpit', 'regenerate'], minionType: 'poison_spider', style: 'demon' },
+            { name: 'Lichkönig', color: '#d4d4d8', hp: 2800, attack: 220, defense: 45, xp: 16000, gold: 7500, speed: 0.9,
+              meleeBonus: 95, specialAttacks: ['frostNova', 'summonUndead', 'deathGrip'], minionType: 'death_knight', style: 'skeleton' },
+            { name: 'Erz-Dämon', color: '#b91c1c', hp: 3200, attack: 230, defense: 55, xp: 17000, gold: 8000, speed: 1.1,
+              meleeBonus: 100, specialAttacks: ['hellfire', 'demonGate', 'corruption'], minionType: 'demon_lord', style: 'demon' },
+            { name: 'Sturmriese', color: '#3b82f6', hp: 4000, attack: 210, defense: 65, xp: 18000, gold: 8500, speed: 0.5,
+              meleeBonus: 110, specialAttacks: ['thunderStorm', 'earthquake', 'giantSmash'], minionType: 'storm_elemental', style: 'orc' },
+            { name: 'Schattenfürst', color: '#1e1b4b', hp: 2600, attack: 250, defense: 40, xp: 19000, gold: 9000, speed: 1.5,
+              meleeBonus: 105, specialAttacks: ['shadowDash', 'darkOrbs', 'nightmare'], minionType: 'shadow_assassin', style: 'demon' },
+            // Tier 6: Level 260-300 (Endgame)
+            { name: 'Weltenverschlinger', color: '#581c87', hp: 4500, attack: 270, defense: 60, xp: 22000, gold: 10000, speed: 0.9,
+              meleeBonus: 120, specialAttacks: ['voidBlast', 'consume', 'dimensionRift'], minionType: 'void_spawn', style: 'demon' },
+            { name: 'Uralter Drache', color: '#dc2626', hp: 5000, attack: 280, defense: 70, xp: 25000, gold: 12000, speed: 0.8,
+              meleeBonus: 130, specialAttacks: ['fireBreath', 'tailSwipe', 'dragonRoar'], minionType: 'dragon_whelp', style: 'demon' },
+            { name: 'Götterbote', color: '#fcd34d', hp: 4200, attack: 300, defense: 55, xp: 28000, gold: 14000, speed: 1.2,
+              meleeBonus: 140, specialAttacks: ['holySmite', 'judgement', 'divineWrath'], minionType: 'angel_warrior', style: 'mage' },
+            { name: 'Apokalypse', color: '#7c2d12', hp: 5500, attack: 320, defense: 75, xp: 32000, gold: 16000, speed: 1.0,
+              meleeBonus: 150, specialAttacks: ['meteorStrike', 'hellfire', 'worldEnder'], minionType: 'demon_lord', style: 'demon' },
+            { name: 'Der Ewige', color: '#fafafa', hp: 6666, attack: 350, defense: 80, xp: 40000, gold: 20000, speed: 1.1,
+              meleeBonus: 175, specialAttacks: ['timeFreeze', 'cosmicBlast', 'rebirth', 'judgment'], minionType: 'eternal_guardian', style: 'demon' }
         ];
 
         // Mutierte Monster-Typen (von Bossen gespawnt)
@@ -1153,7 +1367,19 @@
             poison_spider: { name: 'Gift-Spinne', color: '#4ade80', hp: 70, attack: 35, defense: 5, xp: 130, gold: 75, speed: 2.5, style: 'goblin' },
             vampire_spawn: { name: 'Vampir-Brut', color: '#991b1b', hp: 100, attack: 38, defense: 10, xp: 150, gold: 85, speed: 2.0, style: 'demon' },
             storm_elemental: { name: 'Sturm-Elementar', color: '#fcd34d', hp: 110, attack: 42, defense: 12, xp: 170, gold: 95, speed: 1.8, style: 'mage', attackType: 'ranged', attackRange: 220, attackCooldown: 70, projectileColor: '#fbbf24', projectileSpeed: 7 },
-            chaos_spawn: { name: 'Chaos-Brut', color: '#c084fc', hp: 140, attack: 50, defense: 15, xp: 200, gold: 120, speed: 2.2, style: 'demon' }
+            chaos_spawn: { name: 'Chaos-Brut', color: '#c084fc', hp: 140, attack: 50, defense: 15, xp: 200, gold: 120, speed: 2.2, style: 'demon' },
+            // New minion types for new bosses
+            fire_imp: { name: 'Feuer-Imp', color: '#f97316', hp: 80, attack: 45, defense: 8, xp: 140, gold: 80, speed: 2.3, style: 'goblin', attackType: 'ranged', attackRange: 150, attackCooldown: 100, projectileColor: '#ef4444', projectileSpeed: 6 },
+            wraith: { name: 'Geist', color: '#a1a1aa', hp: 60, attack: 55, defense: 3, xp: 160, gold: 90, speed: 2.5, style: 'mage', attackType: 'ranged', attackRange: 200, attackCooldown: 85, projectileColor: '#6b21a8', projectileSpeed: 5 },
+            void_spawn: { name: 'Leerenbrut', color: '#312e81', hp: 150, attack: 60, defense: 18, xp: 220, gold: 130, speed: 1.8, style: 'demon' },
+            crystal_shard: { name: 'Kristallsplitter', color: '#67e8f9', hp: 200, attack: 40, defense: 35, xp: 180, gold: 100, speed: 1.0, style: 'demon' },
+            time_phantom: { name: 'Zeitphantom', color: '#e0e7ff', hp: 90, attack: 65, defense: 10, xp: 200, gold: 110, speed: 2.8, style: 'mage', attackType: 'ranged', attackRange: 250, attackCooldown: 60, projectileColor: '#818cf8', projectileSpeed: 8 },
+            death_knight: { name: 'Todesritter', color: '#1f2937', hp: 180, attack: 70, defense: 25, xp: 280, gold: 160, speed: 1.4, style: 'skeleton' },
+            demon_lord: { name: 'Dämonenfürst', color: '#7f1d1d', hp: 220, attack: 80, defense: 22, xp: 320, gold: 180, speed: 1.6, style: 'demon' },
+            shadow_assassin: { name: 'Schatten-Assassine', color: '#1e1b4b', hp: 100, attack: 90, defense: 8, xp: 300, gold: 170, speed: 3.0, style: 'demon' },
+            dragon_whelp: { name: 'Drachenwelpe', color: '#dc2626', hp: 250, attack: 85, defense: 30, xp: 350, gold: 200, speed: 1.5, style: 'demon', attackType: 'ranged', attackRange: 180, attackCooldown: 90, projectileColor: '#f97316', projectileSpeed: 6 },
+            angel_warrior: { name: 'Engel-Krieger', color: '#fcd34d', hp: 200, attack: 95, defense: 28, xp: 380, gold: 220, speed: 1.8, style: 'mage' },
+            eternal_guardian: { name: 'Ewiger Wächter', color: '#fafafa', hp: 300, attack: 100, defense: 35, xp: 450, gold: 280, speed: 1.4, style: 'demon' }
         };
 
         // Elite Monster Templates (ab Level 12) - stärker und droppen Elite-Waffen
@@ -1582,9 +1808,10 @@
                         template = eliteMonsterTypes[Math.min(eliteLevel + Math.floor(Math.random() * 2), eliteMonsterTypes.length - 1)];
                         isElite = true;
                     } else {
-                        // Normales Monster
-                        const level = Math.min(Math.floor(game.currentRoom / 2), monsterTypes.length - 1);
-                        template = monsterTypes[Math.min(level + Math.floor(Math.random() * 2), monsterTypes.length - 1)];
+                        // Normales Monster - filter by minLevel
+                        const availableMonsters = monsterTypes.filter(m => !m.minLevel || m.minLevel <= game.currentRoom);
+                        const level = Math.min(Math.floor(game.currentRoom / 2), availableMonsters.length - 1);
+                        template = availableMonsters[Math.min(level + Math.floor(Math.random() * 2), availableMonsters.length - 1)];
                     }
 
                     let x, y, valid;
@@ -1597,9 +1824,13 @@
                         attempts++;
                     } while (!valid && attempts < 100);
 
-                    // Select random weapon and armor for monster
-                    const weaponPool = monsterWeapons[template.style] || [null];
-                    const armorPool = monsterArmors[template.style] || [null];
+                    // Select random weapon and armor for monster (elite monsters get better gear)
+                    const weaponPool = isElite
+                        ? (eliteMonsterWeapons[template.style] || monsterWeapons[template.style] || [null])
+                        : (monsterWeapons[template.style] || [null]);
+                    const armorPool = isElite
+                        ? (eliteMonsterArmors[template.style] || monsterArmors[template.style] || [null])
+                        : (monsterArmors[template.style] || [null]);
                     const equippedWeapon = weaponPool[Math.floor(Math.random() * weaponPool.length)];
                     const equippedArmor = armorPool[Math.floor(Math.random() * armorPool.length)];
 
@@ -1995,13 +2226,17 @@
                     }
                 }
 
-                // Ranged attack for ranged monsters
-                if (monster.attackType === 'ranged') {
+                // Ranged attack for ranged and hybrid monsters
+                if (monster.attackType === 'ranged' || monster.attackType === 'hybrid') {
                     monster.rangedCooldown = Math.max(0, monster.rangedCooldown - 1);
                     const distToPlayer = Math.hypot(monster.x - game.player.x, monster.y - game.player.y);
 
+                    // Hybrid monsters only use ranged if beyond melee range
+                    const useRanged = monster.attackType === 'ranged' ||
+                        (monster.attackType === 'hybrid' && distToPlayer > (monster.meleeRange || 60));
+
                     // Check line of sight before ranged attack
-                    if (distToPlayer < monster.attackRange && monster.rangedCooldown <= 0 && hasLineOfSight(monster.x, monster.y, game.player.x, game.player.y)) {
+                    if (useRanged && distToPlayer < monster.attackRange && monster.rangedCooldown <= 0 && hasLineOfSight(monster.x, monster.y, game.player.x, game.player.y)) {
                         // Fire projectile
                         const angle = Math.atan2(game.player.y - monster.y, game.player.x - monster.x);
                         game.projectiles.push({
@@ -2057,8 +2292,12 @@
                 // Decrement melee cooldown
                 monster.meleeCooldown = Math.max(0, (monster.meleeCooldown || 0) - 1);
 
+                // For hybrid monsters, use their meleeRange; otherwise use weaponRange
+                const effectiveMeleeRange = monster.attackType === 'hybrid' ? (monster.meleeRange || 60) : meleeRange;
+
                 // Check line of sight before melee attack (no attacking through walls)
-                if (!game.player.isDying && game.player.spawnProtection <= 0 && monster.attackType !== 'ranged' && distToPlayer < meleeRange && monster.meleeCooldown <= 0 && hasLineOfSight(monster.x, monster.y, game.player.x, game.player.y)) {
+                // Hybrid and melee monsters can melee attack
+                if (!game.player.isDying && game.player.spawnProtection <= 0 && monster.attackType !== 'ranged' && distToPlayer < effectiveMeleeRange && monster.meleeCooldown <= 0 && hasLineOfSight(monster.x, monster.y, game.player.x, game.player.y)) {
                     // Boss melee bonus damage
                     const meleeBonus = monster.isBoss ? (monster.meleeBonus || 0) : 0;
                     const totalDefense = game.player.defense + (game.player.defenseBoost || 0);
@@ -6951,8 +7190,13 @@
                         template = monsterTypes[monsterMap[type]];
                     }
 
-                    const weaponPool = monsterWeapons[template.style] || [null];
-                    const armorPool = monsterArmors[template.style] || [null];
+                    // Elite monsters get better weapons
+                    const weaponPool = isElite
+                        ? (eliteMonsterWeapons[template.style] || monsterWeapons[template.style] || [null])
+                        : (monsterWeapons[template.style] || [null]);
+                    const armorPool = isElite
+                        ? (eliteMonsterArmors[template.style] || monsterArmors[template.style] || [null])
+                        : (monsterArmors[template.style] || [null]);
                     const equippedWeapon = weaponPool[Math.floor(Math.random() * weaponPool.length)];
                     const equippedArmor = armorPool[Math.floor(Math.random() * armorPool.length)];
                     const baseAtk = template.baseAttack || template.attack || 10;
