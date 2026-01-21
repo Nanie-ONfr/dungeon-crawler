@@ -146,35 +146,105 @@
         }
 
         #gameControls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin-top: 8px;
+            display: grid;
+            grid-template-columns: repeat(5, 52px);
+            grid-template-rows: repeat(2, 52px);
+            gap: 8px;
+            margin-top: 12px;
+            justify-content: center;
+            padding: 10px;
+            background: linear-gradient(180deg, #2a1f1a 0%, #1a1510 100%);
+            border: 4px solid #3d2f25;
+            border-radius: 0;
         }
 
         #gameControls .button {
-            flex: 0 1 auto;
-            min-width: auto;
+            width: 52px;
+            height: 52px;
             margin: 0;
-            padding: 4px 6px;
+            padding: 2px;
+            font-size: 20px;
+            line-height: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* Medieval 8-bit stone button style */
+            background:
+                linear-gradient(135deg, #6b5a4a 0%, #4a3f35 25%, #5a4f42 50%, #3d342c 75%, #2a241f 100%);
+            border: 4px solid;
+            border-color: #8a7a6a #2a1f1a #2a1f1a #8a7a6a;
+            border-radius: 0;
+            box-shadow:
+                inset 3px 3px 0 #9a8a7a,
+                inset -3px -3px 0 #1a1510,
+                inset 6px 6px 0 rgba(255,255,255,0.1),
+                5px 5px 0 #0a0805,
+                6px 6px 0 #000;
+            text-shadow: 2px 2px 0 #000, -1px -1px 0 #000;
+            color: #e8dcc8;
+            image-rendering: pixelated;
+            cursor: pointer;
+            transition: none;
+            position: relative;
+        }
+
+        /* Stone texture overlay */
+        #gameControls .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                repeating-linear-gradient(0deg, transparent, transparent 4px, rgba(0,0,0,0.1) 4px, rgba(0,0,0,0.1) 8px),
+                repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,0,0,0.05) 4px, rgba(0,0,0,0.05) 8px);
+            pointer-events: none;
+        }
+
+        #gameControls .button .price {
             font-size: 10px;
-            background: linear-gradient(180deg, #2a1a3e 0%, #1a0a2e 100%);
-            border: 2px solid #4a2a6e;
-            border-radius: 3px;
-            box-shadow: 0 2px 0 #0a0015, inset 0 1px 0 rgba(255,255,255,0.1);
-            text-shadow: 1px 1px 1px #000;
-            color: #e8d4f0;
+            font-weight: bold;
+            margin-top: 1px;
+            color: #ffd700;
+            text-shadow: 1px 1px 0 #000, 2px 2px 0 #4a3000;
         }
 
         #gameControls .button:hover {
-            background: linear-gradient(180deg, #3a2a4e 0%, #2a1a3e 100%);
-            border-color: #6a4a8e;
+            background:
+                linear-gradient(135deg, #7b6a5a 0%, #5a4f45 25%, #6a5f52 50%, #4d443c 75%, #3a342f 100%);
+            border-color: #aa9a8a #3a2f2a #3a2f2a #aa9a8a;
             color: #fff;
+            box-shadow:
+                inset 3px 3px 0 #ba9a8a,
+                inset -3px -3px 0 #2a2520,
+                inset 6px 6px 0 rgba(255,255,255,0.15),
+                5px 5px 0 #0a0805,
+                6px 6px 0 #000;
         }
 
         #gameControls .button:active {
-            transform: translateY(1px);
-            box-shadow: 0 1px 0 #0a0015;
+            background:
+                linear-gradient(135deg, #4a3f35 0%, #3d342c 50%, #2a241f 100%);
+            border-color: #2a1f1a #6a5a4a #6a5a4a #2a1f1a;
+            box-shadow:
+                inset 3px 3px 0 #1a1510,
+                inset -3px -3px 0 #6a5a4a,
+                2px 2px 0 #0a0805;
+            transform: translate(3px, 3px);
+        }
+
+        #gameControls .button:disabled {
+            background: #3a3535;
+            border-color: #4a4545 #2a2525 #2a2525 #4a4545;
+            color: #666;
+            box-shadow:
+                inset 3px 3px 0 #4a4545,
+                inset -3px -3px 0 #1a1515,
+                5px 5px 0 #0a0805;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
 
         .log-message {
@@ -399,12 +469,12 @@
             <div id="canvasContainer">
                 <canvas id="gameCanvas" width="900" height="550"></canvas>
                 <div id="gameControls">
+                    <button class="button" id="healButton">🧪<span class="price">50G</span></button>
+                    <button class="button" id="fullHealButton">💖<span class="price" id="fullHealPrice">--G</span></button>
+                    <button class="button" id="attackBoostButton">⚔️<span class="price">75G</span></button>
+                    <button class="button" id="defenseBoostButton">🛡️<span class="price">75G</span></button>
+                    <button class="button" id="buyBombButton">💣<span class="price">40G</span></button>
                     <button class="button" id="fullscreenButton">🖥️</button>
-                    <button class="button" id="healButton">🧪50G</button>
-                    <button class="button" id="fullHealButton">💖--G</button>
-                    <button class="button" id="attackBoostButton">⚔️75G</button>
-                    <button class="button" id="defenseBoostButton">🛡️75G</button>
-                    <button class="button" id="buyBombButton">💣40G</button>
                     <button class="button" id="saveButton">💾</button>
                     <button class="button" id="loadButton">📂</button>
                     <button class="button" id="musicButton">🔇</button>
@@ -602,53 +672,106 @@
         };
 
         // Monster Templates with unique designs and attack types
+        // Monster weapon pool (weapons monsters can spawn with)
+        const monsterWeapons = {
+            goblin: [
+                { name: 'Goblin-Dolch', attack: 6, type: 'weapon', style: 'dagger', range: 50, speed: 0.7 },
+                { name: 'Rostiger Dolch', attack: 4, type: 'weapon', style: 'dagger', range: 50, speed: 0.8 },
+                null  // 33% chance no weapon (uses fists)
+            ],
+            skeleton: [
+                { name: 'Knochenschwert', attack: 8, type: 'weapon', style: 'bone', range: 80 },
+                { name: 'Rostiges Schwert', attack: 5, type: 'weapon', style: 'rusty_sword', range: 80 },
+                { name: 'Alter Speer', attack: 7, type: 'weapon', style: 'spear', range: 110 }
+            ],
+            orc: [
+                { name: 'Ork-Axt', attack: 14, type: 'weapon', style: 'axe', range: 70, speed: 1.3 },
+                { name: 'Kriegshammer', attack: 16, type: 'weapon', style: 'hammer', range: 65, speed: 1.5 },
+                { name: 'Grobe Keule', attack: 12, type: 'weapon', style: 'hammer', range: 60, speed: 1.4 }
+            ],
+            mage: [
+                { name: 'Magierstab', attack: 14, type: 'weapon', style: 'staff', range: 100 },
+                { name: 'Feuerstab', attack: 18, type: 'weapon', style: 'fire_staff', range: 100 }
+            ],
+            demon: [
+                { name: 'Dämonenklaue', attack: 22, type: 'weapon', style: 'claw', range: 60, speed: 0.8 },
+                { name: 'Höllenschwert', attack: 20, type: 'weapon', style: 'flame', range: 85 }
+            ]
+        };
+
+        // Monster armor pool
+        const monsterArmors = {
+            goblin: [
+                null, null,  // 66% chance no armor
+                { name: 'Lumpige Rüstung', defense: 2, type: 'armor', style: 'leather' }
+            ],
+            skeleton: [
+                null,  // 33% chance no armor
+                { name: 'Verrostete Kettenrüstung', defense: 4, type: 'armor', style: 'chain' },
+                { name: 'Knochenrüstung', defense: 3, type: 'armor', style: 'leather' }
+            ],
+            orc: [
+                { name: 'Ork-Lederrüstung', defense: 5, type: 'armor', style: 'leather' },
+                { name: 'Ork-Kettenhemd', defense: 7, type: 'armor', style: 'chain' },
+                { name: 'Schwere Ork-Rüstung', defense: 10, type: 'armor', style: 'plate' }
+            ],
+            mage: [
+                { name: 'Magierrobe', defense: 2, type: 'armor', style: 'leather' },
+                null  // 50% chance no armor
+            ],
+            demon: [
+                { name: 'Dämonenhaut', defense: 8, type: 'armor', style: 'dragon' },
+                { name: 'Höllenpanzer', defense: 12, type: 'armor', style: 'plate' }
+            ]
+        };
+
         const monsterTypes = [
             {
                 name: 'Goblin',
                 color: '#4ade80',
                 colorDark: '#22c55e',
                 hp: 30,
-                attack: 8,
-                defense: 2,
+                baseAttack: 5,  // Base attack without weapon
+                baseDefense: 1,  // Base defense without armor
                 xp: 25,
                 gold: 10,
                 speed: 1.5,
                 attackType: 'melee',
-                style: 'goblin'  // Small, pointy ears, dagger
+                style: 'goblin'
             },
             {
                 name: 'Skeleton',
                 color: '#e2e8f0',
                 colorDark: '#94a3b8',
                 hp: 40,
-                attack: 12,
-                defense: 3,
+                baseAttack: 6,
+                baseDefense: 1,
                 xp: 35,
                 gold: 15,
                 speed: 1.2,
                 attackType: 'melee',
-                style: 'skeleton'  // Bones, skull, sword
+                style: 'skeleton'
             },
             {
                 name: 'Orc',
                 color: '#4ade80',
                 colorDark: '#166534',
                 hp: 60,
-                attack: 15,
-                defense: 5,
+                baseAttack: 8,
+                baseDefense: 3,
                 xp: 50,
                 gold: 25,
                 speed: 1,
                 attackType: 'melee',
-                style: 'orc'  // Big, muscular, axe
+                style: 'orc'
             },
             {
                 name: 'Dark Mage',
                 color: '#a78bfa',
                 colorDark: '#7c3aed',
                 hp: 50,
-                attack: 20,
-                defense: 2,
+                baseAttack: 10,
+                baseDefense: 1,
                 xp: 60,
                 gold: 30,
                 speed: 0.8,
@@ -657,20 +780,20 @@
                 projectileSpeed: 4,
                 attackRange: 250,
                 attackCooldown: 120,
-                style: 'mage'  // Robe, staff, magic orb
+                style: 'mage'
             },
             {
                 name: 'Demon',
                 color: '#ef4444',
                 colorDark: '#b91c1c',
                 hp: 80,
-                attack: 25,
-                defense: 8,
+                baseAttack: 12,
+                baseDefense: 5,
                 xp: 100,
                 gold: 50,
                 speed: 1.3,
                 attackType: 'melee',
-                style: 'demon'  // Wings, horns, claws
+                style: 'demon'
             }
         ];
 
@@ -679,9 +802,9 @@
         const itemTypes = {
             weapons: [
                 // Swords - Common/Uncommon
-                { name: 'Rostiges Schwert', attack: 5, type: 'weapon', rarity: 0.35, style: 'sword', range: 80, tier: 'common' },
-                { name: 'Eisenschwert', attack: 10, type: 'weapon', rarity: 0.28, style: 'sword', range: 80, tier: 'common' },
-                { name: 'Stahlschwert', attack: 15, type: 'weapon', rarity: 0.15, style: 'sword', range: 85, tier: 'uncommon' },
+                { name: 'Rostiges Schwert', attack: 5, type: 'weapon', rarity: 0.35, style: 'rusty_sword', range: 80, tier: 'common' },
+                { name: 'Eisenschwert', attack: 10, type: 'weapon', rarity: 0.28, style: 'iron_sword', range: 80, tier: 'common' },
+                { name: 'Stahlschwert', attack: 15, type: 'weapon', rarity: 0.15, style: 'steel_sword', range: 85, tier: 'uncommon' },
                 // Swords - Rare/Legendary (ab Level 10)
                 { name: 'Flammschwert', attack: 25, type: 'weapon', rarity: 0.04, style: 'flame', range: 90, tier: 'legendary', minLevel: 10 },
                 // Daggers (fast, short range)
@@ -1393,17 +1516,36 @@
                         attempts++;
                     } while (!valid && attempts < 100);
 
+                    // Select random weapon and armor for monster
+                    const weaponPool = monsterWeapons[template.style] || [null];
+                    const armorPool = monsterArmors[template.style] || [null];
+                    const equippedWeapon = weaponPool[Math.floor(Math.random() * weaponPool.length)];
+                    const equippedArmor = armorPool[Math.floor(Math.random() * armorPool.length)];
+
+                    // Calculate total attack and defense
+                    const baseAtk = template.baseAttack || template.attack || 5;
+                    const baseDef = template.baseDefense || template.defense || 1;
+                    const weaponAtk = equippedWeapon ? equippedWeapon.attack : 0;
+                    const armorDef = equippedArmor ? equippedArmor.defense : 0;
+                    const totalAttack = baseAtk + weaponAtk;
+                    const totalDefense = baseDef + armorDef;
+
                     const monster = {
                         ...template,
                         x, y,
                         size: template.style === 'orc' ? 22 : (template.style === 'goblin' ? 14 : (isElite ? 24 : 18)),
                         hp: isElite ? Math.floor(template.hp * levelScale) : template.hp,
                         maxHp: isElite ? Math.floor(template.hp * levelScale) : template.hp,
-                        attack: isElite ? Math.floor(template.attack * levelScale) : template.attack,
+                        attack: isElite ? Math.floor(totalAttack * levelScale) : totalAttack,
+                        defense: isElite ? Math.floor(totalDefense * levelScale) : totalDefense,
+                        equippedWeapon: equippedWeapon ? { ...equippedWeapon } : null,
+                        equippedArmor: equippedArmor ? { ...equippedArmor } : null,
+                        weaponRange: equippedWeapon ? (equippedWeapon.range || 60) : 40,
                         targetX: x,
                         targetY: y,
                         aiTimer: 0,
                         animFrame: 0,
+                        attackFrame: 0,
                         flashTimer: 0,
                         rangedCooldown: 0,
                         isElite: isElite
@@ -1469,35 +1611,52 @@
         }
 
         // Drop item from monster with animation
+        // Monsters now drop what they have equipped or potions
         function dropMonsterLoot(monster) {
-            const style = monster.style || 'goblin';
-            const monsterDrop = itemTypes.monsterDrops[style];
             const isBoss = monster.isBoss || false;
             const isElite = monster.isElite || false;
             let item = null;
 
-            // Boss drop chance is much higher (guaranteed drop + bonus for good items)
-            // Elite monsters have 60% drop chance and always drop elite weapons
-            const dropChance = isBoss ? 1.0 : (isElite ? 0.6 : 0.3);
-            const specificDropBonus = isBoss ? 0.3 : 0;  // +30% for boss specific drops
+            // Drop chances based on monster type
+            const dropChance = isBoss ? 1.0 : (isElite ? 0.7 : 0.35);
 
-            // Elite monster drops elite weapons
-            if (isElite && Math.random() < dropChance) {
+            if (Math.random() > dropChance) return; // No drop
+
+            // 10% chance to drop nothing (except bosses)
+            if (!isBoss && Math.random() < 0.10) return;
+
+            // Determine what to drop: equipped weapon, equipped armor, or potion
+            const hasWeapon = monster.equippedWeapon;
+            const hasArmor = monster.equippedArmor;
+
+            if (isBoss) {
+                // Bosses always drop their weapon with high tier (30% legendary, 70% rare)
+                const isLegendary = Math.random() < 0.30;
+                const tier = isLegendary ? 'legendary' : 'rare';
+                if (hasWeapon) {
+                    item = { ...monster.equippedWeapon, tier: tier };
+                    // Boost stats for boss drops
+                    item.attack = Math.floor(item.attack * (isLegendary ? 1.5 : 1.2));
+                } else {
+                    item = selectByRarity(itemTypes.weapons, true);
+                    item.tier = tier;
+                }
+                const dropEmoji = isLegendary ? '🌟' : '👑';
+                addLog(`${dropEmoji} ${monster.name} droppt ${item.name}! (${tier})`, 'loot');
+            } else if (isElite) {
+                // Elite monsters drop elite weapons
                 item = generateEliteWeapon(game.currentRoom);
                 addLog(`✨ ${monster.name} droppt ${item.name}!`, 'loot');
-            }
-            // Check for monster-specific drop first
-            else if (monsterDrop && Math.random() < (monsterDrop.chance + specificDropBonus)) {
-                const drops = monsterDrop.items;
-                item = { ...drops[Math.floor(Math.random() * drops.length)] };
-            } else if (Math.random() < dropChance) {
+            } else {
+                // Normal monsters: 40% weapon, 25% armor, 35% potion
                 const roll = Math.random();
-                if (roll < 0.5) {
-                    item = selectByRarity(itemTypes.potions, isBoss);
-                } else if (roll < 0.85) {
-                    item = selectByRarity(itemTypes.weapons, isBoss);
+                if (roll < 0.40 && hasWeapon) {
+                    item = { ...monster.equippedWeapon };
+                } else if (roll < 0.65 && hasArmor) {
+                    item = { ...monster.equippedArmor };
                 } else {
-                    item = selectByRarity(itemTypes.armor, isBoss);
+                    // Drop a potion
+                    item = selectByRarity(itemTypes.potions, false);
                 }
             }
 
@@ -1551,14 +1710,21 @@
             const oldX = game.player.x;
             const oldY = game.player.y;
 
-            if (game.keys.w || game.keys.ArrowUp) game.player.y -= game.player.speed;
-            if (game.keys.s || game.keys.ArrowDown) game.player.y += game.player.speed;
-            if (game.keys.a || game.keys.ArrowLeft) {
-                game.player.x -= game.player.speed;
+            // Movement keys
+            const moveUp = game.keys.w || game.keys.ArrowUp;
+            const moveDown = game.keys.s || game.keys.ArrowDown;
+            const moveLeft = game.keys.a || game.keys.ArrowLeft;
+            const moveRight = game.keys.d || game.keys.ArrowRight;
+            const speed = game.player.speed;
+
+            if (moveUp) game.player.y -= speed;
+            if (moveDown) game.player.y += speed;
+            if (moveLeft) {
+                game.player.x -= speed;
                 game.player.facingLeft = true;
             }
-            if (game.keys.d || game.keys.ArrowRight) {
-                game.player.x += game.player.speed;
+            if (moveRight) {
+                game.player.x += speed;
                 game.player.facingLeft = false;
             }
 
@@ -1771,8 +1937,9 @@
                     }
                 }
 
-                // Melee attack on contact (only if player not dying and not spawn protected)
-                if (!game.player.isDying && game.player.spawnProtection <= 0 && monster.attackType !== 'ranged' && Math.hypot(monster.x - game.player.x, monster.y - game.player.y) < 30) {
+                // Melee attack based on weapon range (only if player not dying and not spawn protected)
+                const meleeRange = monster.weaponRange || 30;
+                if (!game.player.isDying && game.player.spawnProtection <= 0 && monster.attackType !== 'ranged' && Math.hypot(monster.x - game.player.x, monster.y - game.player.y) < meleeRange) {
                     if (Math.random() < 0.02) {
                         // Boss melee bonus damage
                         const meleeBonus = monster.isBoss ? (monster.meleeBonus || 0) : 0;
@@ -1984,6 +2151,7 @@
         // Check if there's a clear line of sight (no walls between two points)
         function hasLineOfSight(x1, y1, x2, y2) {
             const steps = Math.ceil(Math.hypot(x2 - x1, y2 - y1) / 10);
+            if (steps === 0) return true; // Same position = clear line of sight
             for (let i = 0; i <= steps; i++) {
                 const t = i / steps;
                 const checkX = x1 + (x2 - x1) * t;
@@ -2851,6 +3019,14 @@
                 const bounce = Math.sin(game.animCounter * 0.05 + item.animOffset) * 3;
                 let itemY = item.y + bounce;
 
+                // Draw item shadow - very visible
+                ctx.save();
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+                ctx.beginPath();
+                ctx.ellipse(item.x, item.y + 14, 10, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+
                 // Scale effect for newly dropped items
                 let scale = 1;
                 if (item.dropAnim && item.dropAnim > 10) {
@@ -2926,6 +3102,87 @@
                         ctx.fillRect(item.x - 2, itemY - 9, 4, 14);
                         ctx.fillRect(item.x - 4, itemY - 6, 2, 4);
                         ctx.fillRect(item.x + 2, itemY - 6, 2, 4);
+                    } else if (style === 'rusty_sword') {
+                        // Rusty sword on ground
+                        // Rusty blade
+                        ctx.fillStyle = '#8B7355';
+                        ctx.fillRect(item.x - 2, itemY - 12, 4, 16);
+                        // Rust patches
+                        ctx.fillStyle = '#A0522D';
+                        ctx.fillRect(item.x - 2, itemY - 10, 2, 3);
+                        ctx.fillRect(item.x, itemY - 4, 2, 4);
+                        ctx.fillRect(item.x - 2, itemY, 3, 2);
+                        // Dark rust/pitting
+                        ctx.fillStyle = '#6B4423';
+                        ctx.fillRect(item.x - 1, itemY - 6, 1, 2);
+                        ctx.fillRect(item.x + 1, itemY - 2, 1, 2);
+                        // Dull edge
+                        ctx.fillStyle = '#9B8B7B';
+                        ctx.fillRect(item.x - 2, itemY - 10, 1, 10);
+                        // Worn crossguard
+                        ctx.fillStyle = '#5C4033';
+                        ctx.fillRect(item.x - 5, itemY + 4, 10, 2);
+                        // Worn grip
+                        ctx.fillStyle = '#3a2718';
+                        ctx.fillRect(item.x - 2, itemY + 6, 4, 5);
+                        ctx.fillStyle = '#4a3020';
+                        ctx.fillRect(item.x - 2, itemY + 7, 4, 1);
+                        ctx.fillRect(item.x - 2, itemY + 9, 4, 1);
+                        // Dented pommel
+                        ctx.fillStyle = '#5C4033';
+                        ctx.beginPath();
+                        ctx.arc(item.x, itemY + 12, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (style === 'iron_sword') {
+                        // Iron sword on ground
+                        ctx.fillStyle = '#9CA3AF';
+                        ctx.fillRect(item.x - 2, itemY - 12, 4, 16);
+                        ctx.fillStyle = '#B8C0CC';
+                        ctx.fillRect(item.x - 2, itemY - 10, 1, 12);
+                        ctx.fillStyle = '#6B7280';
+                        ctx.fillRect(item.x - 1, itemY - 10, 1, 12);
+                        // Iron crossguard
+                        ctx.fillStyle = '#4B5563';
+                        ctx.fillRect(item.x - 5, itemY + 4, 10, 2);
+                        // Leather grip
+                        ctx.fillStyle = '#5C4033';
+                        ctx.fillRect(item.x - 2, itemY + 6, 4, 5);
+                        ctx.fillStyle = '#6B5043';
+                        ctx.fillRect(item.x - 2, itemY + 7, 4, 1);
+                        ctx.fillRect(item.x - 2, itemY + 9, 4, 1);
+                        // Iron pommel
+                        ctx.fillStyle = '#4B5563';
+                        ctx.beginPath();
+                        ctx.arc(item.x, itemY + 12, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (style === 'steel_sword') {
+                        // Steel sword on ground - bright and polished
+                        ctx.fillStyle = '#E5E7EB';
+                        ctx.fillRect(item.x - 2, itemY - 12, 4, 16);
+                        ctx.fillStyle = '#F3F4F6';
+                        ctx.fillRect(item.x - 2, itemY - 10, 1, 12);
+                        ctx.fillStyle = '#9CA3AF';
+                        ctx.fillRect(item.x - 1, itemY - 10, 1, 12);
+                        // Steel crossguard
+                        ctx.fillStyle = '#6B7280';
+                        ctx.fillRect(item.x - 5, itemY + 4, 10, 2);
+                        ctx.fillStyle = '#9CA3AF';
+                        ctx.fillRect(item.x - 4, itemY + 4, 8, 1);
+                        // Blue leather grip
+                        ctx.fillStyle = '#1E3A5F';
+                        ctx.fillRect(item.x - 2, itemY + 6, 4, 5);
+                        ctx.fillStyle = '#2B4A6F';
+                        ctx.fillRect(item.x - 2, itemY + 7, 4, 1);
+                        ctx.fillRect(item.x - 2, itemY + 9, 4, 1);
+                        // Steel pommel with gem
+                        ctx.fillStyle = '#6B7280';
+                        ctx.beginPath();
+                        ctx.arc(item.x, itemY + 12, 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#3B82F6';
+                        ctx.beginPath();
+                        ctx.arc(item.x, itemY + 12, 1, 0, Math.PI * 2);
+                        ctx.fill();
                     } else {
                         // Realistic sword on ground
                         // Klinge
@@ -3054,6 +3311,31 @@
 
             // Draw projectiles with trails
             for (const proj of game.projectiles) {
+                // Draw shadow for falling projectiles (arrows, meteors)
+                if (proj.vy > 2 && proj.fromMonster) {
+                    const groundY = canvas.height - 20;
+                    const heightAboveGround = groundY - proj.y;
+                    const shadowAlpha = Math.max(0.1, 0.4 - heightAboveGround / 600);
+                    const shadowSize = Math.max(5, 15 - heightAboveGround / 50);
+
+                    ctx.save();
+                    ctx.fillStyle = `rgba(0, 0, 0, ${shadowAlpha})`;
+                    ctx.beginPath();
+                    ctx.ellipse(proj.x, groundY, shadowSize, shadowSize * 0.4, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Warning ring for impact zone
+                    if (heightAboveGround < 150) {
+                        const warningAlpha = (1 - heightAboveGround / 150) * 0.5;
+                        ctx.strokeStyle = `rgba(255, 50, 50, ${warningAlpha})`;
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.ellipse(proj.x, groundY, shadowSize * 1.5, shadowSize * 0.6, 0, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
+
                 // Draw trail
                 for (let i = 0; i < proj.trail.length; i++) {
                     const t = proj.trail[i];
@@ -3081,6 +3363,45 @@
                 ctx.arc(proj.x, proj.y, proj.size / 4, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.shadowBlur = 0;
+            }
+
+            // Draw monster shadows first (so they appear below monsters)
+            for (const monster of game.monsters) {
+                const s = monster.size;
+
+                // Boss jump attack shadow - grows as boss descends
+                if (monster.isBoss && monster.isJumping && monster.jumpTarget) {
+                    const t = monster.jumpProgress;
+                    const heightFactor = Math.sin(t * Math.PI); // 0 -> 1 -> 0
+                    const shadowSize = s * (0.6 + t * 1.2); // Shadow grows as boss falls
+                    const shadowAlphaJump = 0.4 + (1 - heightFactor) * 0.5; // Much more opaque
+
+                    // Draw shadow at landing position - darker and bigger
+                    ctx.save();
+                    ctx.fillStyle = `rgba(0, 0, 0, ${shadowAlphaJump})`;
+                    ctx.beginPath();
+                    ctx.ellipse(monster.jumpTarget.x, monster.jumpTarget.y + s/2, shadowSize, shadowSize * 0.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Pulsing warning ring
+                    if (t > 0.5) {
+                        const pulseAlpha = (t - 0.5) * 2 * 0.5;
+                        ctx.strokeStyle = `rgba(255, 100, 0, ${pulseAlpha})`;
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.ellipse(monster.jumpTarget.x, monster.jumpTarget.y + s/2, shadowSize * 1.5, shadowSize * 0.6, 0, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                } else {
+                    // Normal monster shadow - very visible
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                    ctx.beginPath();
+                    ctx.ellipse(monster.x, monster.y + s/2 + 4, s * 0.8, s * 0.35, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
             }
 
             // Draw monsters - unique designs per type
@@ -3173,12 +3494,26 @@
                     ctx.fillStyle = darkColor;
                     ctx.fillRect(x - 2, y + 1, 4, 3);
 
-                    // Dagger (when attacking)
-                    if (isAttacking) {
-                        ctx.fillStyle = '#C0C0C0';
-                        ctx.fillRect(x + s/2 + 2, y - 2, 10, 3);
-                        ctx.fillStyle = '#8B4513';
-                        ctx.fillRect(x + s/2, y - 2, 3, 3);
+                    // Draw equipped weapon
+                    const gobWeapon = monster.equippedWeapon;
+                    if (gobWeapon) {
+                        const wStyle = gobWeapon.style;
+                        const weaponSwing = isAttacking ? Math.sin((monster.attackFrame / 15) * Math.PI) * 30 : 0;
+                        ctx.save();
+                        ctx.translate(x + s/2, y);
+                        ctx.rotate((weaponSwing * Math.PI) / 180);
+                        if (wStyle === 'dagger' || wStyle === 'poison_dagger') {
+                            ctx.fillStyle = wStyle === 'poison_dagger' ? '#22c55e' : '#C0C0C0';
+                            ctx.fillRect(2, -2, 8, 3);
+                            ctx.fillStyle = '#8B4513';
+                            ctx.fillRect(0, -2, 3, 3);
+                        } else if (wStyle === 'rusty_sword' || wStyle === 'sword') {
+                            ctx.fillStyle = wStyle === 'rusty_sword' ? '#8B7355' : '#C0C0C0';
+                            ctx.fillRect(2, -3, 12, 3);
+                            ctx.fillStyle = '#8B4513';
+                            ctx.fillRect(0, -4, 3, 5);
+                        }
+                        ctx.restore();
                     }
 
                     // Feet
@@ -3212,11 +3547,42 @@
                     ctx.fillStyle = darkColor;
                     ctx.fillRect(x - 4, y - s/2 + 1, 8, 2);
 
-                    // Sword
-                    ctx.fillStyle = '#A0A0A0';
-                    ctx.fillRect(x + s/2 + 1, y - 8, 3, 16);
-                    ctx.fillStyle = '#606060';
-                    ctx.fillRect(x + s/2 - 1, y - 2, 7, 3);
+                    // Draw equipped weapon
+                    const skelWeapon = monster.equippedWeapon;
+                    const skelSwing = isAttacking ? Math.sin((monster.attackFrame / 15) * Math.PI) * 40 : 0;
+                    ctx.save();
+                    ctx.translate(x + s/2 + 1, y);
+                    ctx.rotate((skelSwing * Math.PI) / 180);
+                    if (skelWeapon) {
+                        const wStyle = skelWeapon.style;
+                        if (wStyle === 'bone') {
+                            ctx.fillStyle = '#e2e8f0';
+                            ctx.fillRect(0, -8, 3, 16);
+                            ctx.fillStyle = '#94a3b8';
+                            ctx.fillRect(-2, -2, 7, 3);
+                        } else if (wStyle === 'rusty_sword' || wStyle === 'sword') {
+                            ctx.fillStyle = wStyle === 'rusty_sword' ? '#8B7355' : '#A0A0A0';
+                            ctx.fillRect(0, -8, 3, 16);
+                            ctx.fillStyle = '#606060';
+                            ctx.fillRect(-2, -2, 7, 3);
+                        } else if (wStyle === 'spear') {
+                            ctx.fillStyle = '#8B4513';
+                            ctx.fillRect(0, -12, 2, 20);
+                            ctx.fillStyle = '#A0A0A0';
+                            ctx.beginPath();
+                            ctx.moveTo(1, -16);
+                            ctx.lineTo(-2, -10);
+                            ctx.lineTo(4, -10);
+                            ctx.fill();
+                        }
+                    } else {
+                        // Default sword if no weapon
+                        ctx.fillStyle = '#A0A0A0';
+                        ctx.fillRect(0, -8, 3, 16);
+                        ctx.fillStyle = '#606060';
+                        ctx.fillRect(-2, -2, 7, 3);
+                    }
+                    ctx.restore();
 
                     // Boney legs
                     ctx.fillStyle = bodyColor;
@@ -3250,12 +3616,37 @@
                     ctx.fillRect(x - 4, y - s/2 - 5, 3, 2);
                     ctx.fillRect(x + 1, y - s/2 - 5, 3, 2);
 
-                    // Axe
-                    ctx.fillStyle = '#8B4513';
-                    ctx.fillRect(x + s/2 + 3, y - 10, 4, 20);
-                    ctx.fillStyle = '#808080';
-                    ctx.fillRect(x + s/2 + 1, y - 12, 10, 6);
-                    ctx.fillRect(x + s/2 + 1, y + 6, 10, 6);
+                    // Draw equipped weapon
+                    const orcWeapon = monster.equippedWeapon;
+                    const orcSwing = isAttacking ? Math.sin((monster.attackFrame / 15) * Math.PI) * 50 : 0;
+                    ctx.save();
+                    ctx.translate(x + s/2 + 3, y);
+                    ctx.rotate((orcSwing * Math.PI) / 180);
+                    if (orcWeapon) {
+                        const wStyle = orcWeapon.style;
+                        if (wStyle === 'axe' || wStyle === 'battleaxe') {
+                            ctx.fillStyle = '#8B4513';
+                            ctx.fillRect(0, -10, 4, 20);
+                            ctx.fillStyle = '#808080';
+                            ctx.fillRect(-2, -12, 10, 6);
+                            ctx.fillRect(-2, 6, 10, 6);
+                        } else if (wStyle === 'hammer') {
+                            ctx.fillStyle = '#8B4513';
+                            ctx.fillRect(1, -8, 3, 18);
+                            ctx.fillStyle = '#606060';
+                            ctx.fillRect(-3, -12, 11, 8);
+                            ctx.fillStyle = '#808080';
+                            ctx.fillRect(-3, -12, 11, 2);
+                        }
+                    } else {
+                        // Default axe
+                        ctx.fillStyle = '#8B4513';
+                        ctx.fillRect(0, -10, 4, 20);
+                        ctx.fillStyle = '#808080';
+                        ctx.fillRect(-2, -12, 10, 6);
+                        ctx.fillRect(-2, 6, 10, 6);
+                    }
+                    ctx.restore();
 
                     // Feet
                     ctx.fillStyle = darkColor;
@@ -3488,6 +3879,16 @@
                 game.player.levelUpAnim--;
             }
 
+            // Draw player shadow - very visible
+            if (!isDying) {
+                ctx.save();
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+                ctx.beginPath();
+                ctx.ellipse(game.player.x, playerY + 24, 16, 7, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
             ctx.shadowBlur = 0;
             ctx.save();
 
@@ -3529,15 +3930,27 @@
             const leftLegOffset = isMoving ? easing.easeInOutSine((legCycle + 1) / 2) * 5 - 2.5 : 0;
             const rightLegOffset = isMoving ? easing.easeInOutSine((-legCycle + 1) / 2) * 5 - 2.5 : 0;
 
-            // Smooth attack arm swing with easing
+            // Smooth attack arm swing with easing - TOP TO BOTTOM slash
             let attackSwing = 0;
+            let attackArmRaise = 0;
             if (isAttacking) {
                 const attackProgress = game.player.attackFrame / 25;
-                // Quick swing out, slower return
-                if (attackProgress < 0.3) {
-                    attackSwing = easing.easeOutQuad(attackProgress / 0.3) * 45;
+                // Wind-up (raise arm), then slash down
+                if (attackProgress < 0.15) {
+                    // Wind-up: raise arm
+                    const windUp = easing.easeOutQuad(attackProgress / 0.15);
+                    attackSwing = -30 * windUp;  // Rotate arm back/up
+                    attackArmRaise = -8 * windUp;  // Raise arm position
+                } else if (attackProgress < 0.4) {
+                    // Slash down: fast swing from top to bottom
+                    const slash = easing.easeOutQuad((attackProgress - 0.15) / 0.25);
+                    attackSwing = -30 + 90 * slash;  // Swing from -30 to +60
+                    attackArmRaise = -8 + 12 * slash;  // Move arm down
                 } else {
-                    attackSwing = easing.easeInOutQuad(1 - (attackProgress - 0.3) / 0.7) * 45;
+                    // Recovery: return to neutral
+                    const recovery = easing.easeInOutQuad((attackProgress - 0.4) / 0.6);
+                    attackSwing = 60 * (1 - recovery);
+                    attackArmRaise = 4 * (1 - recovery);
                 }
             }
 
@@ -3604,7 +4017,8 @@
                 ctx.translate(game.player.x + 8 + recoil, adjustedY + 2);
                 ctx.rotate((-70 * Math.PI) / 180);  // Arm pointing forward
             } else {
-                ctx.translate(game.player.x + 8, adjustedY + 6);
+                // Top-to-bottom slash: arm raises up then swings down
+                ctx.translate(game.player.x + 8, adjustedY + 6 + attackArmRaise);
                 ctx.rotate((-attackSwing * Math.PI) / 180);
             }
             ctx.fillStyle = '#8a8a8a';
@@ -3897,6 +4311,119 @@
                     ctx.fillRect(3, 6, 2, 4);
                     ctx.fillStyle = '#94a3b8';
                     ctx.fillRect(0, 3, 3, 4);
+                } else if (weaponStyle === 'rusty_sword') {
+                    // Rusty Sword - corroded and worn
+                    // Blade with rust spots
+                    ctx.fillStyle = '#8B7355';  // Rusty brown-gray
+                    ctx.fillRect(-1, 6, 4, 20);
+                    // Rust patches
+                    ctx.fillStyle = '#A0522D';  // Sienna (rust color)
+                    ctx.fillRect(-1, 8, 2, 3);
+                    ctx.fillRect(1, 14, 2, 4);
+                    ctx.fillRect(-1, 20, 3, 2);
+                    // Dark rust/pitting
+                    ctx.fillStyle = '#6B4423';
+                    ctx.fillRect(0, 10, 1, 2);
+                    ctx.fillRect(2, 17, 1, 2);
+                    ctx.fillRect(-1, 22, 1, 2);
+                    // Worn tip
+                    ctx.fillStyle = '#8B7355';
+                    ctx.beginPath();
+                    ctx.moveTo(-1, 26);
+                    ctx.lineTo(1, 28);  // Shorter, chipped tip
+                    ctx.lineTo(3, 26);
+                    ctx.fill();
+                    // Dull edge highlight
+                    ctx.fillStyle = '#9B8B7B';
+                    ctx.fillRect(-1, 8, 1, 12);
+                    // Old worn crossguard
+                    ctx.fillStyle = '#5C4033';  // Tarnished
+                    ctx.fillRect(-4, 4, 10, 3);
+                    ctx.fillStyle = '#6B5033';
+                    ctx.fillRect(-3, 4, 8, 1);
+                    // Worn leather grip
+                    ctx.fillStyle = '#3a2718';
+                    ctx.fillRect(0, 0, 3, 6);
+                    ctx.fillStyle = '#4a3020';
+                    ctx.fillRect(0, 1, 3, 1);
+                    ctx.fillRect(0, 3, 3, 1);
+                    // Dented pommel
+                    ctx.fillStyle = '#5C4033';
+                    ctx.beginPath();
+                    ctx.arc(1, -1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (weaponStyle === 'iron_sword') {
+                    // Iron Sword - solid iron blade
+                    // Blade with slight gray tone
+                    ctx.fillStyle = '#9CA3AF';  // Iron gray
+                    ctx.fillRect(-1, 6, 4, 20);
+                    // Edge highlight
+                    ctx.fillStyle = '#B8C0CC';
+                    ctx.fillRect(-1, 8, 1, 16);
+                    // Fuller (blood groove)
+                    ctx.fillStyle = '#6B7280';
+                    ctx.fillRect(0, 8, 1, 14);
+                    // Tip
+                    ctx.fillStyle = '#9CA3AF';
+                    ctx.beginPath();
+                    ctx.moveTo(-1, 26);
+                    ctx.lineTo(1, 30);
+                    ctx.lineTo(3, 26);
+                    ctx.fill();
+                    // Simple iron crossguard
+                    ctx.fillStyle = '#4B5563';
+                    ctx.fillRect(-4, 4, 10, 3);
+                    ctx.fillStyle = '#6B7280';
+                    ctx.fillRect(-3, 4, 8, 1);
+                    // Leather wrapped grip
+                    ctx.fillStyle = '#5C4033';
+                    ctx.fillRect(0, 0, 3, 6);
+                    ctx.fillStyle = '#6B5043';
+                    ctx.fillRect(0, 1, 3, 1);
+                    ctx.fillRect(0, 3, 3, 1);
+                    // Iron pommel
+                    ctx.fillStyle = '#4B5563';
+                    ctx.beginPath();
+                    ctx.arc(1, -1, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (weaponStyle === 'steel_sword') {
+                    // Steel Sword - polished steel blade
+                    // Bright polished blade
+                    ctx.fillStyle = '#E5E7EB';  // Bright steel
+                    ctx.fillRect(-1, 6, 4, 20);
+                    // Bright edge highlight
+                    ctx.fillStyle = '#F3F4F6';
+                    ctx.fillRect(-1, 8, 1, 16);
+                    // Fuller with shine
+                    ctx.fillStyle = '#9CA3AF';
+                    ctx.fillRect(0, 8, 1, 14);
+                    // Sharp tip
+                    ctx.fillStyle = '#E5E7EB';
+                    ctx.beginPath();
+                    ctx.moveTo(-1, 26);
+                    ctx.lineTo(1, 31);  // Longer tip
+                    ctx.lineTo(3, 26);
+                    ctx.fill();
+                    // Decorative steel crossguard
+                    ctx.fillStyle = '#6B7280';
+                    ctx.fillRect(-5, 4, 12, 3);
+                    ctx.fillStyle = '#9CA3AF';
+                    ctx.fillRect(-4, 4, 10, 1);
+                    // Blue leather grip
+                    ctx.fillStyle = '#1E3A5F';
+                    ctx.fillRect(0, 0, 3, 6);
+                    ctx.fillStyle = '#2B4A6F';
+                    ctx.fillRect(0, 1, 3, 1);
+                    ctx.fillRect(0, 3, 3, 1);
+                    // Steel pommel with gem
+                    ctx.fillStyle = '#6B7280';
+                    ctx.beginPath();
+                    ctx.arc(1, -1, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#3B82F6';  // Blue gem
+                    ctx.beginPath();
+                    ctx.arc(1, -1, 1, 0, Math.PI * 2);
+                    ctx.fill();
                 } else {
                     // Realistic Sword Design
                     // Klinge (Blade) mit Hohlkehle
@@ -4192,8 +4719,10 @@
 
             // Attack range indicator (replaces spinning effect)
             if (game.player.attackCooldown > 0) {
-                const progress = 1 - (game.player.attackCooldown / 30);
                 const weapon = game.player.equippedWeapon;
+                const weaponSpeed = weapon ? (weapon.speed || 1) : 1;
+                const maxCooldown = Math.floor(30 * weaponSpeed);
+                const progress = Math.max(0, Math.min(1, 1 - (game.player.attackCooldown / maxCooldown)));
                 const weaponRange = weapon ? (weapon.range || 80) : 28; // Faust = 28 (realistisch kurz)
                 const weaponStyle = weapon ? weapon.style : 'fist';
 
@@ -4473,6 +5002,87 @@
                             ctx.fillRect(-2, -9, 4, 14);
                             ctx.fillRect(-4, -6, 2, 4);
                             ctx.fillRect(2, -6, 2, 4);
+                        } else if (style === 'rusty_sword') {
+                            // Rusty sword in inventory
+                            // Rusty blade
+                            ctx.fillStyle = '#8B7355';
+                            ctx.fillRect(-2, -12, 4, 16);
+                            // Rust patches
+                            ctx.fillStyle = '#A0522D';
+                            ctx.fillRect(-2, -10, 2, 3);
+                            ctx.fillRect(0, -4, 2, 4);
+                            ctx.fillRect(-2, 0, 3, 2);
+                            // Dark rust/pitting
+                            ctx.fillStyle = '#6B4423';
+                            ctx.fillRect(-1, -6, 1, 2);
+                            ctx.fillRect(1, -2, 1, 2);
+                            // Dull edge
+                            ctx.fillStyle = '#9B8B7B';
+                            ctx.fillRect(-2, -10, 1, 10);
+                            // Worn crossguard
+                            ctx.fillStyle = '#5C4033';
+                            ctx.fillRect(-5, 4, 10, 2);
+                            // Worn grip
+                            ctx.fillStyle = '#3a2718';
+                            ctx.fillRect(-2, 6, 4, 5);
+                            ctx.fillStyle = '#4a3020';
+                            ctx.fillRect(-2, 7, 4, 1);
+                            ctx.fillRect(-2, 9, 4, 1);
+                            // Dented pommel
+                            ctx.fillStyle = '#5C4033';
+                            ctx.beginPath();
+                            ctx.arc(0, 12, 2, 0, Math.PI * 2);
+                            ctx.fill();
+                        } else if (style === 'iron_sword') {
+                            // Iron sword in inventory
+                            ctx.fillStyle = '#9CA3AF';
+                            ctx.fillRect(-2, -12, 4, 16);
+                            ctx.fillStyle = '#B8C0CC';
+                            ctx.fillRect(-2, -10, 1, 12);
+                            ctx.fillStyle = '#6B7280';
+                            ctx.fillRect(-1, -10, 1, 12);
+                            // Iron crossguard
+                            ctx.fillStyle = '#4B5563';
+                            ctx.fillRect(-5, 4, 10, 2);
+                            // Leather grip
+                            ctx.fillStyle = '#5C4033';
+                            ctx.fillRect(-2, 6, 4, 5);
+                            ctx.fillStyle = '#6B5043';
+                            ctx.fillRect(-2, 7, 4, 1);
+                            ctx.fillRect(-2, 9, 4, 1);
+                            // Iron pommel
+                            ctx.fillStyle = '#4B5563';
+                            ctx.beginPath();
+                            ctx.arc(0, 12, 2, 0, Math.PI * 2);
+                            ctx.fill();
+                        } else if (style === 'steel_sword') {
+                            // Steel sword in inventory - polished
+                            ctx.fillStyle = '#E5E7EB';
+                            ctx.fillRect(-2, -12, 4, 16);
+                            ctx.fillStyle = '#F3F4F6';
+                            ctx.fillRect(-2, -10, 1, 12);
+                            ctx.fillStyle = '#9CA3AF';
+                            ctx.fillRect(-1, -10, 1, 12);
+                            // Steel crossguard
+                            ctx.fillStyle = '#6B7280';
+                            ctx.fillRect(-5, 4, 10, 2);
+                            ctx.fillStyle = '#9CA3AF';
+                            ctx.fillRect(-4, 4, 8, 1);
+                            // Blue leather grip
+                            ctx.fillStyle = '#1E3A5F';
+                            ctx.fillRect(-2, 6, 4, 5);
+                            ctx.fillStyle = '#2B4A6F';
+                            ctx.fillRect(-2, 7, 4, 1);
+                            ctx.fillRect(-2, 9, 4, 1);
+                            // Steel pommel with gem
+                            ctx.fillStyle = '#6B7280';
+                            ctx.beginPath();
+                            ctx.arc(0, 12, 2.5, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.fillStyle = '#3B82F6';
+                            ctx.beginPath();
+                            ctx.arc(0, 12, 1, 0, Math.PI * 2);
+                            ctx.fill();
                         } else {
                             // Realistic sword in inventory
                             // Klinge
@@ -4724,8 +5334,8 @@
 
         function updateFullHealButton() {
             const price = getFullHealPrice();
-            const btn = document.getElementById('fullHealButton');
-            btn.textContent = `💖${price}G`;
+            const priceSpan = document.getElementById('fullHealPrice');
+            if (priceSpan) priceSpan.textContent = `${price}G`;
         }
 
         document.getElementById('fullHealButton').addEventListener('click', () => {
@@ -4771,22 +5381,43 @@
             }
         });
 
-        // Schutz-Boost Button (75 Gold) - +50% Verteidigung für 30 Sekunden
+        // Goldschild kaufen Button (75 Gold) - adds a gold shield to inventory
         document.getElementById('defenseBoostButton').addEventListener('click', () => {
             if (game.player.gold >= 75) {
-                game.player.gold -= 75;
-                const boostAmount = Math.floor(game.player.defense * 0.5) + 5;
-                game.player.defenseBoost = (game.player.defenseBoost || 0) + boostAmount;
-                game.player.isDrinking = true;
-                game.player.drinkFrame = 0;
-                game.player.drinkHeal = 0;
-                game.player.drinkColor = '#4169e1';
-                sfx.powerUp();
-                addLog(`🛡️ Schutztrank! +${boostAmount} Verteidigung für 30s!`, 'loot');
-                setTimeout(() => {
-                    game.player.defenseBoost = Math.max(0, (game.player.defenseBoost || 0) - boostAmount);
-                    addLog('🛡️ Schutzeffekt ist abgelaufen.', 'info');
-                }, 30000);
+                // Check for empty inventory slot
+                let added = false;
+                for (let i = 0; i < game.player.inventory.length; i++) {
+                    if (!game.player.inventory[i]) {
+                        const goldShield = {
+                            name: 'Goldschild',
+                            defense: 12,
+                            type: 'armor',
+                            style: 'plate',
+                            tier: 'uncommon'
+                        };
+                        game.player.inventory[i] = goldShield;
+                        added = true;
+                        break;
+                    }
+                }
+                if (!added && game.player.inventory.length < 9) {
+                    const goldShield = {
+                        name: 'Goldschild',
+                        defense: 12,
+                        type: 'armor',
+                        style: 'plate',
+                        tier: 'uncommon'
+                    };
+                    game.player.inventory.push(goldShield);
+                    added = true;
+                }
+                if (added) {
+                    game.player.gold -= 75;
+                    sfx.pickup();
+                    addLog('🛡️ Goldschild gekauft! (+12 Verteidigung)', 'loot');
+                } else {
+                    addLog('Inventar voll!', 'combat');
+                }
             } else {
                 addLog('Nicht genug Gold! (75 benötigt)', 'combat');
             }
@@ -5070,7 +5701,7 @@
         // Music button handler
         document.getElementById('musicButton').addEventListener('click', () => {
             const isPlaying = music.toggle();
-            document.getElementById('musicButton').textContent = isPlaying ? '🔊 Musik An' : '🔇 Musik Aus';
+            document.getElementById('musicButton').textContent = isPlaying ? '🎵' : '🔇';
         });
 
         // ==================== END MUSIK SYSTEM ====================
@@ -5988,7 +6619,7 @@
         // Sound Effects toggle button
         document.getElementById('sfxButton').addEventListener('click', () => {
             sfx.enabled = !sfx.enabled;
-            document.getElementById('sfxButton').textContent = sfx.enabled ? '🔊 SFX An' : '🔇 SFX Aus';
+            document.getElementById('sfxButton').textContent = sfx.enabled ? '🔊' : '🔈';
         });
 
         // Fullscreen toggle
@@ -6014,7 +6645,7 @@
         });
 
         // ==================== SECRET MENU SYSTEM ====================
-        const SECRET_CODE = 'Uu54321';
+        const SECRET_CODE = 'Uu09876';
 
         // Get all available weapons for the give command
         function getAllWeapons() {
@@ -6061,87 +6692,174 @@
             const parts = cmd.trim().toLowerCase().split(/\s+/);
             const command = parts[0];
 
-            if (command === '/help') {
-                addCommandOutput('=== VERFÜGBARE BEFEHLE ===', 'info');
-                addCommandOutput('/help - Zeigt alle Befehle', 'info');
-                addCommandOutput('/give player <waffen-name> - Gibt eine Waffe', 'info');
-                addCommandOutput('/give armor <rüstung-name> - Gibt eine Rüstung', 'info');
-                addCommandOutput('/give potion - Gibt einen Heiltrank', 'info');
-                addCommandOutput('/give bomb - Gibt eine Bombe', 'info');
-                addCommandOutput('/give gold <menge> - Gibt Gold', 'info');
-                addCommandOutput('/skip <anzahl> - Überspringt Level', 'info');
-                addCommandOutput('/heal - Heilt vollständig', 'info');
-                addCommandOutput('/god - Schaltet Gott-Modus um', 'info');
-                addCommandOutput('/kill - Tötet alle Monster', 'info');
-                addCommandOutput('/list weapons - Zeigt alle Waffen', 'info');
-                addCommandOutput('/list armor - Zeigt alle Rüstungen', 'info');
-                addCommandOutput('/xp <menge> - Gibt XP', 'info');
+            if (command === '/help' || command === '/h' || command === '/?') {
+                addCommandOutput('=== BEFEHLE ===', 'info');
+                addCommandOutput('/give weapon|armor|potion|bomb|gold [name/menge]', 'info');
+                addCommandOutput('/list weapons|armor|monsters', 'info');
+                addCommandOutput('/spawn goblin|skeleton|orc|mage|demon|boss [el1|el2|el3]', 'info');
+                addCommandOutput('/skip [anzahl] - Level überspringen', 'info');
+                addCommandOutput('/heal - Voll heilen', 'info');
+                addCommandOutput('/god - Unverwundbar', 'info');
+                addCommandOutput('/kill - Alle Monster töten', 'info');
+                addCommandOutput('/xp [menge] - XP geben', 'info');
+                addCommandOutput('/stats - Spieler-Stats', 'info');
+                addCommandOutput('/tp [x] [y] - Teleportieren', 'info');
+                addCommandOutput('/clear - Items löschen', 'info');
+                addCommandOutput('/speed [wert] - Spieler-Speed', 'info');
                 return;
             }
 
             if (command === '/list') {
                 const listType = parts[1];
-                if (listType === 'weapons') {
+                if (listType === 'weapons' || listType === 'w') {
                     addCommandOutput('=== WAFFEN ===', 'info');
-                    getAllWeapons().forEach(w => {
-                        addCommandOutput(`${w.name} (ATK: ${w.attack})`, 'info');
-                    });
-                } else if (listType === 'armor') {
+                    getAllWeapons().forEach(w => addCommandOutput(`${w.name} (${w.attack} ATK)`, 'info'));
+                } else if (listType === 'armor' || listType === 'a') {
                     addCommandOutput('=== RÜSTUNGEN ===', 'info');
-                    itemTypes.armor.forEach(a => {
-                        addCommandOutput(`${a.name} (DEF: ${a.defense})`, 'info');
-                    });
+                    itemTypes.armor.forEach(a => addCommandOutput(`${a.name} (${a.defense} DEF)`, 'info'));
+                } else if (listType === 'monsters' || listType === 'm') {
+                    addCommandOutput('=== MONSTER ===', 'info');
+                    monsterTypes.forEach(m => addCommandOutput(`${m.name} (${m.style})`, 'info'));
                 } else {
-                    addCommandOutput('Nutzung: /list weapons|armor', 'error');
+                    addCommandOutput('Nutzung: /list weapons|armor|monsters', 'error');
                 }
                 return;
             }
 
-            if (command === '/give') {
+            if (command === '/spawn' || command === '/s') {
+                const type = parts[1];
+                const eliteLevel = parts[2];  // el1, el2, el3
+                const monsterMap = {
+                    'goblin': 0, 'g': 0,
+                    'skeleton': 1, 'skel': 1, 'sk': 1,
+                    'orc': 2, 'o': 2,
+                    'mage': 3, 'dark': 3, 'm': 3,
+                    'demon': 4, 'd': 4,
+                    'boss': 'boss', 'b': 'boss'
+                };
+
+                if (type in monsterMap) {
+                    let template, isBoss = false, isElite = false;
+
+                    // Check for elite modifier (el1, el2, el3)
+                    const eliteMatch = eliteLevel ? eliteLevel.match(/^el(\d)$/i) : null;
+                    const eliteTier = eliteMatch ? parseInt(eliteMatch[1]) : 0;
+
+                    if (monsterMap[type] === 'boss') {
+                        template = bossTypes[Math.floor(Math.random() * bossTypes.length)];
+                        isBoss = true;
+                    } else if (eliteTier > 0) {
+                        // Spawn elite version
+                        template = eliteMonsterTypes[monsterMap[type]];
+                        isElite = true;
+                    } else {
+                        template = monsterTypes[monsterMap[type]];
+                    }
+
+                    const weaponPool = monsterWeapons[template.style] || [null];
+                    const armorPool = monsterArmors[template.style] || [null];
+                    const equippedWeapon = weaponPool[Math.floor(Math.random() * weaponPool.length)];
+                    const equippedArmor = armorPool[Math.floor(Math.random() * armorPool.length)];
+                    const baseAtk = template.baseAttack || template.attack || 10;
+                    const baseDef = template.baseDefense || template.defense || 2;
+
+                    // Elite tier multiplier (el1=1.0x, el2=1.5x, el3=2.0x bonus stats)
+                    const eliteMultiplier = eliteTier > 0 ? 1 + (eliteTier - 1) * 0.5 : 1;
+
+                    const monster = {
+                        ...template,
+                        x: game.player.x + (Math.random() - 0.5) * 200,
+                        y: game.player.y + (Math.random() - 0.5) * 200,
+                        size: isBoss ? 35 : (isElite ? 24 : (template.style === 'orc' ? 22 : 18)),
+                        hp: Math.floor(template.hp * eliteMultiplier),
+                        maxHp: Math.floor(template.hp * eliteMultiplier),
+                        attack: Math.floor((baseAtk + (equippedWeapon ? equippedWeapon.attack : 0)) * eliteMultiplier),
+                        defense: Math.floor((baseDef + (equippedArmor ? equippedArmor.defense : 0)) * eliteMultiplier),
+                        equippedWeapon, equippedArmor,
+                        weaponRange: equippedWeapon ? equippedWeapon.range : 40,
+                        targetX: game.player.x, targetY: game.player.y,
+                        aiTimer: 0, animFrame: 0, attackFrame: 0, flashTimer: 0, rangedCooldown: 0,
+                        isBoss, isElite
+                    };
+                    game.monsters.push(monster);
+                    const eliteText = isElite ? ` (Elite Stufe ${eliteTier})` : '';
+                    addCommandOutput(`✅ ${monster.name}${eliteText} gespawnt!`, 'success');
+                } else {
+                    addCommandOutput('Nutzung: /spawn goblin|skeleton|orc|mage|demon|boss [el1|el2|el3]', 'error');
+                }
+                return;
+            }
+
+            if (command === '/stats') {
+                addCommandOutput('=== SPIELER-STATS ===', 'info');
+                addCommandOutput(`HP: ${game.player.hp}/${game.player.maxHp}`, 'info');
+                addCommandOutput(`ATK: ${game.player.attack} (Basis: ${game.player.baseAttack})`, 'info');
+                addCommandOutput(`DEF: ${game.player.defense} (Basis: ${game.player.baseDefense})`, 'info');
+                addCommandOutput(`Level: ${game.player.level} | XP: ${game.player.xp}/${game.player.xpToNext}`, 'info');
+                addCommandOutput(`Gold: ${game.player.gold}`, 'info');
+                addCommandOutput(`Waffe: ${game.player.equippedWeapon ? game.player.equippedWeapon.name : 'Keine'}`, 'info');
+                addCommandOutput(`Rüstung: ${game.player.equippedArmor ? game.player.equippedArmor.name : 'Keine'}`, 'info');
+                return;
+            }
+
+            if (command === '/tp') {
+                const tx = parseInt(parts[1]) || game.player.x;
+                const ty = parseInt(parts[2]) || game.player.y;
+                game.player.x = Math.max(30, Math.min(canvas.width - 30, tx));
+                game.player.y = Math.max(30, Math.min(canvas.height - 30, ty));
+                addCommandOutput(`✅ Teleportiert zu (${Math.floor(game.player.x)}, ${Math.floor(game.player.y)})`, 'success');
+                return;
+            }
+
+            if (command === '/clear') {
+                const count = game.items.length;
+                game.items = [];
+                addCommandOutput(`✅ ${count} Items gelöscht!`, 'success');
+                return;
+            }
+
+            if (command === '/speed') {
+                const spd = parseFloat(parts[1]) || 4;
+                game.player.speed = Math.max(1, Math.min(20, spd));
+                addCommandOutput(`✅ Speed: ${game.player.speed}`, 'success');
+                return;
+            }
+
+            if (command === '/give' || command === '/g') {
                 const type = parts[1];
                 const itemName = parts.slice(2).join(' ');
 
-                if (type === 'player' || type === 'weapon') {
-                    // Give weapon
+                if (type === 'weapon' || type === 'w') {
                     const weapons = getAllWeapons();
                     const weapon = weapons.find(w => w.name.toLowerCase().includes(itemName));
                     if (weapon) {
-                        const newWeapon = { ...weapon };
-                        game.player.equippedWeapon = newWeapon;
-                        game.player.attack = game.player.baseAttack + newWeapon.attack;
-                        addCommandOutput(`✅ ${newWeapon.name} erhalten und ausgerüstet!`, 'success');
-                        addLog(`🎁 ${newWeapon.name} erhalten!`, 'loot');
+                        game.player.equippedWeapon = { ...weapon };
+                        game.player.attack = game.player.baseAttack + weapon.attack;
+                        addCommandOutput(`✅ ${weapon.name} ausgerüstet!`, 'success');
                     } else {
-                        addCommandOutput(`❌ Waffe "${itemName}" nicht gefunden. Nutze /list weapons`, 'error');
+                        addCommandOutput(`❌ "${itemName}" nicht gefunden`, 'error');
                     }
-                } else if (type === 'armor') {
+                } else if (type === 'armor' || type === 'a') {
                     const armor = itemTypes.armor.find(a => a.name.toLowerCase().includes(itemName));
                     if (armor) {
-                        const newArmor = { ...armor };
-                        game.player.equippedArmor = newArmor;
-                        game.player.defense = game.player.baseDefense + newArmor.defense;
-                        addCommandOutput(`✅ ${newArmor.name} erhalten und ausgerüstet!`, 'success');
-                        addLog(`🎁 ${newArmor.name} erhalten!`, 'loot');
+                        game.player.equippedArmor = { ...armor };
+                        game.player.defense = game.player.baseDefense + armor.defense;
+                        addCommandOutput(`✅ ${armor.name} ausgerüstet!`, 'success');
                     } else {
-                        addCommandOutput(`❌ Rüstung "${itemName}" nicht gefunden. Nutze /list armor`, 'error');
+                        addCommandOutput(`❌ "${itemName}" nicht gefunden`, 'error');
                     }
-                } else if (type === 'potion') {
-                    const potion = { ...itemTypes.potions[2] }; // Großer Heiltrank
-                    game.player.inventory.push(potion);
-                    addCommandOutput(`✅ ${potion.name} erhalten!`, 'success');
-                    addLog(`🎁 ${potion.name} erhalten!`, 'loot');
-                } else if (type === 'bomb') {
-                    const bomb = { ...itemTypes.bombs[1] }; // Große Bombe
-                    game.player.inventory.push(bomb);
-                    addCommandOutput(`✅ ${bomb.name} erhalten!`, 'success');
-                    addLog(`🎁 ${bomb.name} erhalten!`, 'loot');
+                } else if (type === 'potion' || type === 'p') {
+                    game.player.inventory.push({ ...itemTypes.potions[2] });
+                    addCommandOutput('✅ Großer Heiltrank erhalten!', 'success');
+                } else if (type === 'bomb' || type === 'b') {
+                    game.player.inventory.push({ ...itemTypes.bombs[1] });
+                    addCommandOutput('✅ Große Bombe erhalten!', 'success');
                 } else if (type === 'gold') {
-                    const amount = parseInt(parts[2]) || 100;
+                    const amount = parseInt(parts[2]) || 1000;
                     game.player.gold += amount;
-                    addCommandOutput(`✅ ${amount} Gold erhalten!`, 'success');
-                    addLog(`🎁 ${amount} Gold erhalten!`, 'loot');
+                    addCommandOutput(`✅ +${amount} Gold!`, 'success');
                 } else {
-                    addCommandOutput('Nutzung: /give player|armor|potion|bomb|gold <name/menge>', 'error');
+                    addCommandOutput('/give weapon|armor|potion|bomb|gold [name]', 'error');
                 }
                 return;
             }
