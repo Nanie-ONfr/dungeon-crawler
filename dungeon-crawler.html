@@ -795,11 +795,11 @@
                 name: 'Goblin',
                 color: '#4ade80',
                 colorDark: '#22c55e',
-                hp: 30,
-                baseAttack: 5,  // Base attack without weapon
+                hp: 22,
+                baseAttack: 4,  // Base attack without weapon
                 baseDefense: 1,  // Base defense without armor
                 xp: 25,
-                gold: 10,
+                gold: 12,
                 speed: 1.5,
                 attackType: 'melee',
                 style: 'goblin'
@@ -808,11 +808,11 @@
                 name: 'Skeleton',
                 color: '#e2e8f0',
                 colorDark: '#94a3b8',
-                hp: 40,
-                baseAttack: 6,
+                hp: 30,
+                baseAttack: 5,
                 baseDefense: 1,
                 xp: 35,
-                gold: 15,
+                gold: 18,
                 speed: 1.2,
                 attackType: 'melee',
                 style: 'skeleton'
@@ -821,11 +821,11 @@
                 name: 'Orc',
                 color: '#4ade80',
                 colorDark: '#166534',
-                hp: 60,
-                baseAttack: 8,
-                baseDefense: 3,
+                hp: 45,
+                baseAttack: 6,
+                baseDefense: 2,
                 xp: 50,
-                gold: 25,
+                gold: 30,
                 speed: 1,
                 attackType: 'melee',
                 style: 'orc'
@@ -834,11 +834,11 @@
                 name: 'Dark Mage',
                 color: '#a78bfa',
                 colorDark: '#7c3aed',
-                hp: 50,
-                baseAttack: 10,
+                hp: 35,
+                baseAttack: 8,
                 baseDefense: 1,
                 xp: 60,
-                gold: 30,
+                gold: 35,
                 speed: 0.8,
                 attackType: 'ranged',
                 projectileColor: '#c084fc',
@@ -851,11 +851,11 @@
                 name: 'Demon',
                 color: '#ef4444',
                 colorDark: '#b91c1c',
-                hp: 80,
-                baseAttack: 12,
-                baseDefense: 5,
+                hp: 60,
+                baseAttack: 10,
+                baseDefense: 4,
                 xp: 100,
-                gold: 50,
+                gold: 60,
                 speed: 1.3,
                 attackType: 'melee',
                 style: 'demon'
@@ -1702,13 +1702,13 @@
             const isElite = monster.isElite || false;
             let item = null;
 
-            // Drop chances based on monster type
-            const dropChance = isBoss ? 1.0 : (isElite ? 0.7 : 0.35);
+            // Drop chances based on monster type (increased)
+            const dropChance = isBoss ? 1.0 : (isElite ? 0.85 : 0.50);
 
             if (Math.random() > dropChance) return; // No drop
 
-            // 10% chance to drop nothing (except bosses)
-            if (!isBoss && Math.random() < 0.10) return;
+            // 5% chance to drop nothing (except bosses)
+            if (!isBoss && Math.random() < 0.05) return;
 
             // Determine what to drop: equipped weapon, equipped armor, or potion
             const hasWeapon = monster.equippedWeapon;
