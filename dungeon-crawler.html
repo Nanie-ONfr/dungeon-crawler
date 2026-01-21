@@ -1733,7 +1733,19 @@
                 // Bosses always drop their weapon with high tier (30% legendary, 70% rare)
                 const isLegendary = Math.random() < 0.30;
                 const tier = isLegendary ? 'legendary' : 'rare';
-                if (hasWeapon) {
+
+                // Last 6 bosses (bossType >= 4) have 25% chance to drop Feuerstab
+                const bossIndex = monster.bossType || 0;
+                if (bossIndex >= 4 && Math.random() < 0.25) {
+                    item = {
+                        name: 'Feuerstab',
+                        attack: 22 + Math.floor(bossIndex * 3),  // Scales with boss level
+                        type: 'weapon',
+                        style: 'fire_staff',
+                        range: 100,
+                        tier: 'legendary'
+                    };
+                } else if (hasWeapon) {
                     item = { ...monster.equippedWeapon, tier: tier };
                     // Boost stats for boss drops
                     item.attack = Math.floor(item.attack * (isLegendary ? 1.5 : 1.2));
@@ -1741,8 +1753,8 @@
                     item = selectByRarity(itemTypes.weapons, true);
                     item.tier = tier;
                 }
-                const dropEmoji = isLegendary ? '🌟' : '👑';
-                addLog(`${dropEmoji} ${monster.name} droppt ${item.name}! (${tier})`, 'loot');
+                const dropEmoji = item.style === 'fire_staff' ? '🔥' : (isLegendary ? '🌟' : '👑');
+                addLog(`${dropEmoji} ${monster.name} droppt ${item.name}! (${item.tier})`, 'loot');
             } else if (isElite) {
                 // Elite monsters drop elite weapons
                 item = generateEliteWeapon(game.currentRoom);
