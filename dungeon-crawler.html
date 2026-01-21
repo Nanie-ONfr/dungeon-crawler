@@ -1888,7 +1888,8 @@
                     monster.rangedCooldown = Math.max(0, monster.rangedCooldown - 1);
                     const distToPlayer = Math.hypot(monster.x - game.player.x, monster.y - game.player.y);
 
-                    if (distToPlayer < monster.attackRange && monster.rangedCooldown <= 0) {
+                    // Check line of sight before ranged attack
+                    if (distToPlayer < monster.attackRange && monster.rangedCooldown <= 0 && hasLineOfSight(monster.x, monster.y, game.player.x, game.player.y)) {
                         // Fire projectile
                         const angle = Math.atan2(game.player.y - monster.y, game.player.x - monster.x);
                         game.projectiles.push({
@@ -1939,7 +1940,9 @@
 
                 // Melee attack based on weapon range (only if player not dying and not spawn protected)
                 const meleeRange = monster.weaponRange || 30;
-                if (!game.player.isDying && game.player.spawnProtection <= 0 && monster.attackType !== 'ranged' && Math.hypot(monster.x - game.player.x, monster.y - game.player.y) < meleeRange) {
+                const distToPlayer = Math.hypot(monster.x - game.player.x, monster.y - game.player.y);
+                // Check line of sight before melee attack (no attacking through walls)
+                if (!game.player.isDying && game.player.spawnProtection <= 0 && monster.attackType !== 'ranged' && distToPlayer < meleeRange && hasLineOfSight(monster.x, monster.y, game.player.x, game.player.y)) {
                     if (Math.random() < 0.02) {
                         // Boss melee bonus damage
                         const meleeBonus = monster.isBoss ? (monster.meleeBonus || 0) : 0;
