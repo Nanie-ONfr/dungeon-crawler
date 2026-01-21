@@ -1529,6 +1529,7 @@
                     aiTimer: 0,
                     animFrame: 0,
                     flashTimer: 0,
+                    meleeCooldown: 0,
                     isBoss: true,
                     bossType: bossIndex,
                     attackType: 'melee',
@@ -1613,6 +1614,7 @@
                         attackFrame: 0,
                         flashTimer: 0,
                         rangedCooldown: 0,
+                        meleeCooldown: 0,
                         isElite: isElite
                     };
 
@@ -2024,25 +2026,30 @@
                 // Melee attack based on weapon range (only if player not dying and not spawn protected)
                 const meleeRange = monster.weaponRange || 30;
                 const distToPlayer = Math.hypot(monster.x - game.player.x, monster.y - game.player.y);
-                // Check line of sight before melee attack (no attacking through walls)
-                if (!game.player.isDying && game.player.spawnProtection <= 0 && monster.attackType !== 'ranged' && distToPlayer < meleeRange && hasLineOfSight(monster.x, monster.y, game.player.x, game.player.y)) {
-                    if (Math.random() < 0.02) {
-                        // Boss melee bonus damage
-                        const meleeBonus = monster.isBoss ? (monster.meleeBonus || 0) : 0;
-                        const totalDefense = game.player.defense + (game.player.defenseBoost || 0);
-                        const damage = Math.max(1, monster.attack + meleeBonus - totalDefense);
-                        game.player.hp = Math.max(0, game.player.hp - damage);
-                        game.player.flashTimer = 15;  // Player damage flash
-                        game.screenShake = monster.isBoss ? 15 : 10;  // Stronger shake for boss
-                        monster.isAttacking = true;   // Monster attack animation
-                        monster.attackFrame = 0;
-                        sfx.playerHit();  // Player damage sound
-                        addLog(`${monster.name} trifft dich für ${damage} Schaden!`, 'combat');
-                        createParticles(game.player.x, game.player.y, '#ef4444');
 
-                        if (game.player.hp <= 0) {
-                            startPlayerDeath();
-                        }
+                // Decrement melee cooldown
+                monster.meleeCooldown = Math.max(0, (monster.meleeCooldown || 0) - 1);
+
+                // Check line of sight before melee attack (no attacking through walls)
+                if (!game.player.isDying && game.player.spawnProtection <= 0 && monster.attackType !== 'ranged' && distToPlayer < meleeRange && monster.meleeCooldown <= 0 && hasLineOfSight(monster.x, monster.y, game.player.x, game.player.y)) {
+                    // Boss melee bonus damage
+                    const meleeBonus = monster.isBoss ? (monster.meleeBonus || 0) : 0;
+                    const totalDefense = game.player.defense + (game.player.defenseBoost || 0);
+                    const damage = Math.max(1, monster.attack + meleeBonus - totalDefense);
+                    game.player.hp = Math.max(0, game.player.hp - damage);
+                    game.player.flashTimer = 15;  // Player damage flash
+                    game.screenShake = monster.isBoss ? 15 : 10;  // Stronger shake for boss
+                    monster.isAttacking = true;   // Monster attack animation
+                    monster.attackFrame = 0;
+                    sfx.playerHit();  // Player damage sound
+                    addLog(`${monster.name} trifft dich für ${damage} Schaden!`, 'combat');
+                    createParticles(game.player.x, game.player.y, '#ef4444');
+
+                    // Set cooldown (60 frames = 1 second, bosses attack faster)
+                    monster.meleeCooldown = monster.isBoss ? 45 : 60;
+
+                    if (game.player.hp <= 0) {
+                        startPlayerDeath();
                     }
                 }
 
@@ -6939,7 +6946,7 @@
                         equippedWeapon, equippedArmor,
                         weaponRange: equippedWeapon ? equippedWeapon.range : 40,
                         targetX: game.player.x, targetY: game.player.y,
-                        aiTimer: 0, animFrame: 0, attackFrame: 0, flashTimer: 0, rangedCooldown: 0,
+                        aiTimer: 0, animFrame: 0, attackFrame: 0, flashTimer: 0, rangedCooldown: 0, meleeCooldown: 0,
                         isBoss, isElite
                     };
                     game.monsters.push(monster);
